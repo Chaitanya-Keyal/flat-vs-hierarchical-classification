@@ -96,3 +96,11 @@ Criterion   flat species  hierarchy  flat family  router    bottleneck
 Gini               94.93      93.82        96.25   95.07        router
 Entropy            95.41      94.65        96.80   95.62        router
 A perfect router would add oracle - overall: Gini 4.45, Entropy 3.68
+
+Test rows given the right family: router / flat tree (its predicted species' family)
+Family             rows          Gini       Entropy
+Bufonidae            14        10 / 9       10 / 11
+Dendrobatidae       108       96 / 96       95 / 99
+Hylidae             433     404 / 413     410 / 413
+Leptodactylidae     884     858 / 867     861 / 870
+All                1439   1368 / 1385   1376 / 1393

@@ -160,9 +160,10 @@ def main():
     print(
         line.format("Criterion", "flat species", "hierarchy", "flat family", "router", "bottleneck")
     )
+    flat_trees = {c: DecisionTree(c).fit(data.X_train, data.y_train) for c in CRITERIA}
     flat = {}
     for c in CRITERIA:
-        flat[c] = data.scores(DecisionTree(c).fit(data.X_train, data.y_train))
+        flat[c] = data.scores(flat_trees[c])
         t = test[c]
         side = "router" if t["p_B"] > t["p_A"] else "experts"
         accs = (flat[c][1], t["overall"], flat[c][2], t["router"])
@@ -173,7 +174,31 @@ def main():
             f"{c.capitalize()} {pct(test[c]['oracle'] - test[c]['overall'])}" for c in CRITERIA
         )
     )
-    return {"rows": rows, "train": train, "test": test, "per_family": per_family, "flat": flat}
+
+    print("\nTest rows given the right family: router / flat tree (its predicted species' family)")
+    right = {
+        c: (
+            models[c].predict_family(data.X_test) == data.f_test,
+            data.families(flat_trees[c].predict(data.X_test)) == data.f_test,
+        )
+        for c in CRITERIA
+    }
+    line = "{:<17}{:>6}" + "{:>14}" * len(CRITERIA)
+    print(line.format("Family", "rows", *(c.capitalize() for c in CRITERIA)))
+    family_rows = {}
+    for name in [*families, "All"]:
+        rows_f = data.f_test == name if name != "All" else np.ones(len(data.f_test), dtype=bool)
+        family_rows[name] = {c: [int(r[rows_f].sum()) for r in right[c]] for c in CRITERIA}
+        cells = (f"{router} / {flat_tree}" for router, flat_tree in family_rows[name].values())
+        print(line.format(name, int(rows_f.sum()), *cells))
+    return {
+        "rows": rows,
+        "train": train,
+        "test": test,
+        "per_family": per_family,
+        "flat": flat,
+        "family_rows": family_rows,
+    }
 
 
 if __name__ == "__main__":

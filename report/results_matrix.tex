@@ -131,9 +131,9 @@ sides of the split, so every accuracy here is optimistic for new recordings (the
 \paragraph{Single tree (Part 1).}
 Grown without limits, both trees fit the training set exactly (100\%; depth
 \both{dt}{depth}, with \both{dt}{leaves} leaves) but reach only \both{dt}{test}\% on the test
-set: a full tree has low bias and high variance. Table~4 shows the trade-off. Shallow trees are
-poor on both sets (underfitting); test accuracy levels off by depth~12 while training accuracy
-goes on to 100\%, so the deepest splits fit details of the training rows rather than structure.
+set: a full tree has low bias and high variance. Table~4 shows the trade-off. Shallow trees
+underfit both sets; test accuracy levels off by depth~12 while training accuracy goes on to
+100\%, so the deepest splits fit noise in the training rows, not structure.
 Entropy is ahead of Gini at every depth on this data. The derived family accuracy
 (\both{dt}{family}\%) is higher than the species accuracy because a species error inside the
 right family still counts as a family hit.
@@ -173,8 +173,8 @@ The forest is the best flat model: \both{rf}{test}\%, \both{rf}{gain-bag} points
 (mean single-tree accuracy \both{treeacc}{rf}\% against \both{treeacc}{bag}\%), because each split
 sees only \res{rf-m} of the 22 MFCCs, but they agree less often: the average pairwise agreement of
 their test predictions is \both{agree}{rf}, against \both{agree}{bag} for bagging. Less correlated
-trees make errors that the vote can cancel, so the ensemble gains more than its members lose, as
-the handout's explanation predicts.
+errors cancel in the vote, so the ensemble gains more than its members lose, as the handout
+predicts.
 
 \paragraph{Hierarchy (Part 4).}
 The hierarchy is \both{hier}{loss} points below the flat tree (\both{hier}{test}\% against
@@ -183,12 +183,13 @@ The hierarchy is \both{hier}{loss} points below the flat tree (\both{hier}{test}
 correct routing. The router is the bottleneck. It sends \both{t3}{pb}\% of the rows to the wrong
 family, each then a certain species error, and its accuracy (\both{t3}{router}\%) is
 \both{hier}{router-loss} points below the family accuracy that the flat tree gets for free by
-mapping its predicted species. A likely reason: each family is a union of species clusters
-(Hylidae has five species, Leptodactylidae three), which one tree must carve out from the coarse
-labels alone. The small families suffer most: Bufonidae (\res{bufo-rows} test rows) is routed
-correctly only \both{hier}{bufo-recall}\% of the time and Dendrobatidae \both{hier}{dend-recall}\%,
-and since their experts are constants, routing is everything there. A perfect router would add
-\both{hier}{gap} points. On this dataset the easier sub-problems do not make up for the router's
+mapping its predicted species: \both{hier}{deficit} test rows overall, and
+\both{hier}{large-deficit} in the two large families alone. A likely reason: each family is a
+union of species clusters (five in Hylidae, three in Leptodactylidae), which one tree must carve
+out from the coarse labels alone. Router recall is lowest on the small families (Bufonidae,
+\res{bufo-rows} test rows: \both{hier}{bufo-recall}\%), where the experts are constants and
+routing is everything, but the flat tree is weak there too (\both{flat}{bufo-recall}\%). A
+perfect router would add \both{hier}{gap} points. On this dataset the easier sub-problems do not make up for the router's
 mistakes, so the hierarchy does not help.
 
 \paragraph{Naive Bayes (Part 5).}
@@ -196,8 +197,8 @@ Naive Bayes is the weakest model (\res{nb-test}\%). It treats the 22 MFCCs as in
 each species, but they are not: within a species the mean $|r|$ between two features is
 \res{within-min} to \res{within-max}, and over the training set \res{corr-above} of the 231 pairs
 have $|r| > 0.5$, up to \res{corr-max}. Correlated features count the same evidence several
-times, which makes the posteriors overconfident and lets a block of related MFCCs outvote the
-rest; a tree uses one feature per split and is not misled by redundancy. A second effect is
+times, so a block of related MFCCs can outvote the rest; a tree uses one feature per split and is
+not misled by redundancy. A second effect is
 specific to this data: MFCC~\res{nb-constant-feature} is constant in every training row of
 \res{nb-constant-species}, so its variance there is only $\varepsilon = \res{nb-eps}$. The
 \res{nb-constant-shared} test rows that share that value gain a large likelihood bonus for the
