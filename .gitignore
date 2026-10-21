@@ -1,0 +1,9 @@
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+dist/
+
+# LaTeX build files; results_matrix.pdf itself is copied to the repo root and tracked.
+report/build/

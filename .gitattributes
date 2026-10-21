@@ -1,0 +1,2 @@
+# The UCI file is used byte for byte as downloaded, so git must never convert it.
+Frogs_MFCCs.csv -text
