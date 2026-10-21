@@ -7,7 +7,7 @@ flat tree of Part 1.
 
 import numpy as np
 
-from common import CRITERIA, Data, confusion_matrix, header, pct, print_rows
+from common import CRITERIA, Data, confusion_matrix, header, pct, print_confusion, print_rows
 from part1_decision_tree import DecisionTree
 
 
@@ -69,13 +69,6 @@ def analyse(model, X, family, species):
     }
 
 
-def print_matrix(title, labels, cm):
-    print(f"\n{title} (rows: true, columns: predicted)")
-    print(" " * 26 + "".join(f"{j:>5}" for j in range(len(labels))))
-    for j, (name, row) in enumerate(zip(labels, cm)):
-        print(f"{j:>2} {name:<23}" + "".join(f"{v:>5}" for v in row))
-
-
 def details(criterion, model, train, test, data):
     """The per-criterion printout: accuracies, both confusion matrices, per-family results."""
     families, species = np.unique(data.f_train), np.unique(data.y_train)
@@ -90,12 +83,12 @@ def details(criterion, model, train, test, data):
     )
     routed, predicted = model.predict_family(data.X_test), model.predict(data.X_test)
     oracle = oracle_predict(model, data.X_test, data.f_test)
-    print_matrix(
+    print_confusion(
         "Router confusion matrix, test set",
         families,
         confusion_matrix(data.f_test, routed, families),
     )
-    print_matrix(
+    print_confusion(
         "Species confusion matrix, test set",
         species,
         confusion_matrix(data.y_test, predicted, species),
@@ -103,18 +96,20 @@ def details(criterion, model, train, test, data):
     print("\nPer family, test set")
     line = "{:<17}{:>6}{:>17}{:>16}{:>9}"
     print(line.format("Family", "rows", "router recall %", "expert alone %", "final %"))
+    per_family = {}
     for name in families:
         rows = data.f_test == name
         truth = data.y_test[rows]
-        print(
-            line.format(
-                name,
-                rows.sum(),
-                pct(np.mean(routed[rows] == name)),
-                pct(np.mean(oracle[rows] == truth)),
-                pct(np.mean(predicted[rows] == truth)),
-            )
-        )
+        per_family[name] = {
+            "rows": int(rows.sum()),
+            "router_recall": float(np.mean(routed[rows] == name)),
+            "expert_alone": float(np.mean(oracle[rows] == truth)),
+            "final": float(np.mean(predicted[rows] == truth)),
+        }
+        f = per_family[name]
+        accs = (f["router_recall"], f["expert_alone"], f["final"])
+        print(line.format(name, f["rows"], *map(pct, accs)))
+    return per_family
 
 
 def main():
@@ -158,8 +153,7 @@ def main():
             line.format(c.capitalize(), *map(pct, (t["router"], t["oracle"], t["p_A"], t["p_B"])))
         )
 
-    for c in CRITERIA:
-        details(c, models[c], train[c], test[c], data)
+    per_family = {c: details(c, models[c], train[c], test[c], data) for c in CRITERIA}
 
     print("\nAgainst the flat tree of Part 1, test %")
     line = "{:<10}{:>14}{:>11}{:>13}{:>8}{:>14}"
@@ -179,7 +173,7 @@ def main():
             f"{c.capitalize()} {pct(test[c]['oracle'] - test[c]['overall'])}" for c in CRITERIA
         )
     )
-    return {"rows": rows, "train": train, "test": test, "flat": flat}
+    return {"rows": rows, "train": train, "test": test, "per_family": per_family, "flat": flat}
 
 
 if __name__ == "__main__":

@@ -117,19 +117,19 @@ def main():
 
     print("\nDecision stumps (max_depth = 1, T = 50) against max_depth = 3 (not in the matrix)")
     print(f"{'Criterion':<10}{'depth 3 test %':>16}{'stumps test %':>15}{'species predicted':>19}")
-    stump_test = {}
+    stump_info = {}
     for c in CRITERIA:
-        predicted = len(np.unique(stumps[c].predict(data.X_test)))
-        stump_test[c] = test_acc(stumps[c])
+        acc, predicted = test_acc(stumps[c]), len(np.unique(stumps[c].predict(data.X_test)))
+        stump_info[c] = {"test": acc, "species_predicted": predicted}
         print(
-            f"{c.capitalize():<10}{pct(test_acc(boosting[c])):>16}{pct(stump_test[c]):>15}"
+            f"{c.capitalize():<10}{pct(test_acc(boosting[c])):>16}{pct(acc):>15}"
             f"{predicted:>13} of {len(stumps[c].classes_)}"
         )
     return {
         "rows": rows,
         "single_test": {c: test_acc(single[c]) for c in CRITERIA},
         "rounds": rounds,
-        "stumps_test": stump_test,
+        "stumps": stump_info,
     }
 
 

@@ -96,6 +96,13 @@ def tally(votes, n_classes, weights=None):
     return np.tensordot(weights, hits, axes=1)
 
 
+def print_confusion(title, labels, cm):
+    print(f"\n{title} (rows: true, columns: predicted)")
+    print(" " * 26 + "".join(f"{j:>5}" for j in range(len(labels))))
+    for j, (name, row) in enumerate(zip(labels, cm)):
+        print(f"{j:>2} {name:<23}" + "".join(f"{v:>5}" for v in row))
+
+
 def header(title, data):
     print(title)
     n_species, n_families = len(np.unique(data.y_train)), len(np.unique(data.f_train))

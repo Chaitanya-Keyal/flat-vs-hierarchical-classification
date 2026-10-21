@@ -8,7 +8,7 @@ they are independent within each class.
 
 import numpy as np
 
-from common import Data, header, print_rows
+from common import Data, confusion_matrix, header, print_confusion, print_rows
 
 
 class GaussianNB:
@@ -73,6 +73,17 @@ def print_correlations(corr):
     return {"mean_abs": float(off.mean()), "max_abs": float(off.max()), "above_half": above}
 
 
+def within_class_correlation(X, y):
+    """Mean |r| between the features inside each class, the dependence naive Bayes assumes
+    away (features constant within the class left out)."""
+    mean_abs = {}
+    for c in np.unique(y):
+        Xc = X[y == c]
+        r = np.corrcoef(Xc[:, Xc.std(axis=0) > 0], rowvar=False)
+        mean_abs[str(c)] = float(np.abs(r[np.triu_indices(len(r), k=1)]).mean())
+    return mean_abs
+
+
 def main():
     data = Data()
     header("Part 5: Gaussian naive Bayes, flat (predicts Species)", data)
@@ -83,14 +94,35 @@ def main():
     print_rows(rows)
     print("Family %: the family of each predicted species, by the training rows' species map.")
     print(f"\nepsilon = 1e-9 * max_j Var_train(x_j) = {nb.epsilon_:.3e}")
-    flat = nb.var_ == nb.epsilon_  # zero variance before smoothing
-    for k, j in zip(*np.nonzero(flat)):
+    constant = list(zip(*np.nonzero(nb.var_ == nb.epsilon_)))  # zero variance before smoothing
+    shared = {}
+    for k, j in constant:
+        value = nb.mean_[k, j]
+        shared[str(nb.classes_[k])] = int(np.sum(data.X_test[:, j] == value))
+        print(f"MFCC {j + 1} is constant ({value:g}) within {nb.classes_[k]} in training, so its")
         print(
-            f"MFCC {j + 1} is constant within {nb.classes_[k]} in training: its variance is epsilon"
+            f"variance there is epsilon; {shared[str(nb.classes_[k])]} of the {len(data.X_test)} "
+            f"test rows share that value"
         )
+    cm = confusion_matrix(data.y_test, nb.predict(data.X_test), nb.classes_)
+    print_confusion("Confusion matrix, test set", nb.classes_, cm)
+    predicted = {str(c): (int(cm[:, k].sum()), int(cm[k, k])) for k, c in enumerate(nb.classes_)}
 
     corr = np.corrcoef(data.X_train, rowvar=False)
-    return {"rows": rows, "epsilon": nb.epsilon_, "correlation": print_correlations(corr)}
+    correlation = print_correlations(corr)
+    within = within_class_correlation(data.X_train, data.y_train)
+    print("\nMean |r| between the features within each species (naive Bayes assumes 0)")
+    for c, r in within.items():
+        print(f"  {c:<24}{r:.2f}")
+    return {
+        "rows": rows,
+        "epsilon": nb.epsilon_,
+        "constant": [(str(nb.classes_[k]), int(j) + 1) for k, j in constant],
+        "shared": shared,  # test rows with the constant value, per such species
+        "predicted": predicted,  # per species: (test rows predicted as it, of which right)
+        "correlation": correlation,
+        "within": within,
+    }
 
 
 if __name__ == "__main__":
