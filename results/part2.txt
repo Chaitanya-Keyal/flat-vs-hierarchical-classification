@@ -1,0 +1,27 @@
+Part 2: bagging and AdaBoost (SAMME) on flat trees (predict Species)
+Data: train 5756 / test 1439 rows, 22 MFCC features, 10 species in 4 families
+
+Results matrix rows
+Method                          Criterion   Train %   Test %  Family %
+2a. Bagging                     Gini          99.97    96.66     97.50
+2a. Bagging                     Entropy       99.98    96.87     97.50
+2b. AdaBoost                    Gini          97.52    95.34     96.73
+2b. AdaBoost                    Entropy       96.35    94.16     95.00
+Family %: the family of each predicted species, by the training rows' species map.
+
+Test % against the single tree of Part 1
+Criterion  Single tree   Bagging  AdaBoost
+Gini             94.93     96.66     95.34
+Entropy          95.41     96.87     94.16
+
+AdaBoost rounds kept (of T = 50) and the weighted error eps of the kept trees
+Criterion  max_depth  rounds  eps first    last     max
+Gini               3      50     0.2149  0.6044  0.6306
+Entropy            3      50     0.1560  0.4863  0.5447
+Gini               1      50     0.3902  0.7810  0.7935
+Entropy            1      50     0.3822  0.7988  0.7988
+
+Decision stumps (max_depth = 1, T = 50) against max_depth = 3 (not in the matrix)
+Criterion   depth 3 test %  stumps test %  species predicted
+Gini                 95.34          83.32            8 of 10
+Entropy              94.16          84.16            9 of 10

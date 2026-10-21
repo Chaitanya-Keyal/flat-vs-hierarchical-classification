@@ -1,0 +1,21 @@
+Part 3: random forest on flat trees (predict Species)
+Data: train 5756 / test 1439 rows, 22 MFCC features, 10 species in 4 families
+m = floor(sqrt(22)) = 4 candidate features, drawn afresh at every split
+
+Results matrix rows
+Method                          Criterion   Train %   Test %  Family %
+3. Random Forest                Gini         100.00    97.78     98.40
+3. Random Forest                Entropy      100.00    97.64     98.19
+Family %: the family of each predicted species, by the training rows' species map.
+
+Test % against the single tree (Part 1) and bagging (Part 2)
+Criterion  Single tree   Bagging  Random Forest
+Gini             94.93     96.66          97.78
+Entropy          95.41     96.87          97.64
+
+Extra (not graded): how alike are the trees, on the test set?
+Criterion Ensemble        trees  pairwise agreement  mean tree test %
+Gini      Bagging            25              0.9218             93.67
+Gini      Random Forest      50              0.8991             92.94
+Entropy   Bagging            25              0.9320             94.31
+Entropy   Random Forest      50              0.9026             93.07

@@ -1,0 +1,207 @@
+\documentclass[11pt,a4paper]{article}
+
+% no build date or random ID in the PDF, so a rebuild is byte for byte the same
+\pdfinfoomitdate=1
+\pdftrailerid{}
+\pdfsuppressptexinfo=-1
+
+\usepackage[margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+
+\captionsetup{font=small,labelfont=bf}
+\makeatletter
+\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\z@}{1.2ex \@plus .4ex}{-1em}%
+  {\normalfont\bfseries}}
+\makeatother
+\definecolor{router}{RGB}{228,230,250}  % the handout's shading of the hierarchical rows
+\hyphenation{Amee-rega-tri-vit-tata}
+\setlength{\parskip}{4pt}
+
+% Every number comes from results/numbers.tex, which `python -m tools.run_all` writes from what
+% the part scripts compute and print; a mistyped key prints a bold ??.
+\makeatletter
+\newcommand{\resdef}[2]{\@namedef{res@#1}{#2}}
+\newcommand{\res}[1]{\@ifundefined{res@#1}{\textbf{??}}{\@nameuse{res@#1}}}
+\newcommand{\resrows}[1]{\@ifundefined{res@#1}{\textbf{??} \\}{\@nameuse{res@#1}}}
+\makeatother
+\input{../results/numbers.tex}
+
+% "Gini / entropy" pairs: \both{bag}{test} is \res{bag-gini-test} / \res{bag-entropy-test}.
+\newcommand{\both}[2]{\res{#1-gini-#2}\,/\allowbreak\,\res{#1-entropy-#2}}
+\newcommand{\cell}[2]{\res{#1-train} & \res{#1-test} & #2\res{#1-family}}
+
+\begin{document}
+\setcounter{table}{1}  % number the tables as the handout does: 2 and 3, then 4
+
+\begin{center}
+  {\large BITS F464 Machine Learning, Semester I 2026--27}\\[4pt]
+  {\Large\bfseries Assignment 1: Flat vs.\ Hierarchical Classification From Scratch}\\[4pt]
+  {\large Results matrix}\\[10pt]
+  \begin{tabular}{ll}
+    Chaitanya Keyal & 2023B4A70727H \\
+    Vishesh Agarwal & 2023B4A70611H \\
+    TBD & TBD
+  \end{tabular}
+\end{center}
+
+\noindent Anuran Calls (MFCCs), with the 22 MFCCs as the only features. The handout's
+\texttt{stratified\_split} (seed 42) gives \res{n-train} training and \res{n-test} test rows, and
+every model uses the settings of the handout's Table~1. Accuracies are in \%. Every number in
+Tables~2 and~3 is printed by \texttt{part1\_decision\_tree.py} to \texttt{part5\_naive\_bayes.py}
+(Python~\res{python}, NumPy~\res{numpy}, pandas~\res{pandas}).
+
+\begin{table}[h]
+  \centering
+  \caption{Results matrix (flat models predict Species; \textdagger\ see the note).}
+  \renewcommand{\arraystretch}{1.2}
+  \newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+  \begin{tabular}{l l R{2.1cm} R{2.1cm} R{2.8cm}}
+    \toprule
+     & & \multicolumn{2}{c}{Overall accuracy (Species)} & Family acc.\,\textdagger \\
+    \cmidrule(lr){3-4} \cmidrule(lr){5-5}
+    Method & Criterion & Train & Test & Test \\
+    \midrule
+    \multirow{2}{*}{1. Single Decision Tree} & Gini & \cell{dt-gini}{} \\
+     & Entropy & \cell{dt-entropy}{} \\
+    \midrule
+    \multirow{2}{*}{2a. Bagging} & Gini & \cell{bag-gini}{} \\
+     & Entropy & \cell{bag-entropy}{} \\
+    \midrule
+    \multirow{2}{*}{2b. AdaBoost} & Gini & \cell{ada-gini}{} \\
+     & Entropy & \cell{ada-entropy}{} \\
+    \midrule
+    \multirow{2}{*}{3. Random Forest} & Gini & \cell{rf-gini}{} \\
+     & Entropy & \cell{rf-entropy}{} \\
+    \midrule
+    \rowcolor{router} & Gini & \cell{hier-gini}{\textbf{Router:} } \\
+    \rowcolor{router} \multirow{-2}{*}{4. Hierarchical Decision Tree}
+     & Entropy & \cell{hier-entropy}{\textbf{Router:} } \\
+    \midrule
+    5. Gaussian Naive Bayes & --- & \cell{nb}{} \\
+    \bottomrule
+  \end{tabular}
+
+  \medskip
+  \begin{minipage}{0.86\linewidth}
+    \footnotesize \textdagger\ For flat models, the \emph{derived} family accuracy: each predicted
+    species mapped to its family. For the hierarchical rows, the router accuracy; their overall
+    accuracy columns hold the final species accuracy.
+  \end{minipage}
+\end{table}
+
+\begin{table}[h]
+  \centering
+  \caption{Supplementary: hierarchical failure analysis (test set, \%).}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{l r r r r}
+    \toprule
+    Criterion & Router acc. & Oracle acc. & (A) Router right, expert wrong & (B) Router wrong \\
+    \midrule
+    Gini & \res{t3-gini-router} & \res{t3-gini-oracle} & \res{t3-gini-pa} & \res{t3-gini-pb} \\
+    Entropy & \res{t3-entropy-router} & \res{t3-entropy-oracle} & \res{t3-entropy-pa}
+      & \res{t3-entropy-pb} \\
+    \bottomrule
+  \end{tabular}
+
+  \medskip
+  \begin{minipage}{0.86\linewidth}
+    \footnotesize $A_{\text{overall}} = A_{\text{router}} - p_A$, for example
+    \res{t3-gini-router} $-$ \res{t3-gini-pa} $=$ \res{hier-gini-test} for Gini;
+    \texttt{part4\_hierarchical.py} checks it exactly, on counts.
+  \end{minipage}
+\end{table}
+
+\newpage
+\section*{What the numbers show}
+\small
+
+Pairs of numbers \textit{a}\,/\,\textit{b} are Gini\,/\,entropy; accuracies are on the test set
+unless stated otherwise. \res{rec-both} of the \res{rec-total} recordings have syllables on both
+sides of the split, so every accuracy here is optimistic for new recordings (the handout's caveat).
+
+\paragraph{Single tree (Part 1).}
+Grown without limits, both trees fit the training set exactly (100\%; depth
+\both{dt}{depth}, with \both{dt}{leaves} leaves) but reach only \both{dt}{test}\% on the test
+set: a full tree has low bias and high variance. Table~4 shows the trade-off. Shallow trees are
+poor on both sets (underfitting); test accuracy levels off by depth~12 while training accuracy
+goes on to 100\%, so the deepest splits fit details of the training rows rather than structure.
+Entropy is ahead of Gini at every depth on this data. The derived family accuracy
+(\both{dt}{family}\%) is higher than the species accuracy because a species error inside the
+right family still counts as a family hit.
+
+\begin{table}[h]
+  \centering
+  \caption{Single tree against \texttt{max\_depth} (not part of the matrix), \%.}
+  \begin{tabular}{ll *{7}{r}}
+    \toprule
+     & & \multicolumn{7}{c}{\texttt{max\_depth}} \\
+    \cmidrule(lr){3-9}
+    Criterion & Set & \res{sweep-header} \\
+    \midrule
+    \resrows{sweep-rows}
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Bagging and AdaBoost (Part 2).}
+Bagging 25 trees gains \both{bag}{gain} points over the single tree. Each tree overfits its own
+bootstrap sample differently, and the vote averages those errors away (variance reduction);
+training accuracy stays at \both{bag}{train}\%, since a row that only a minority of the trees saw
+can still be outvoted. AdaBoost attacks bias instead: one depth-3 tree reaches
+\both{sweep}{3-test}\% (Table~4), and 50 reweighted rounds lift that to \both{ada}{test}\%, about
+the single unconstrained tree (\both{ada}{gain} points). All 50 rounds were kept: the weighted
+error grows from \both{ada}{eps-first} to \both{ada}{eps-last} as the weights move onto the hard
+rows, but stays below the limit $1 - 1/K = 0.9$. Decision stumps reach only
+\both{stumps}{test}\%. A stump has two leaves, so it names at most two of the ten species per
+round; its weighted error climbs to \both{stumps}{eps-last}, close to the limit, which leaves each
+late stump a small say ($\alpha = \both{stumps}{alpha-last}$, against \both{ada}{alpha-last} for
+the last depth-3 trees), and the 50-stump vote predicts only \both{stumps}{species} of the ten
+species on the test set.
+
+\paragraph{Random forest (Part 3).}
+The forest is the best flat model: \both{rf}{test}\%, \both{rf}{gain-bag} points above bagging and
+\both{rf}{gain-dt} above the single tree. Its trees are individually weaker than bagged trees
+(mean single-tree accuracy \both{treeacc}{rf}\% against \both{treeacc}{bag}\%), because each split
+sees only \res{rf-m} of the 22 MFCCs, but they agree less often: the average pairwise agreement of
+their test predictions is \both{agree}{rf}, against \both{agree}{bag} for bagging. Less correlated
+trees make errors that the vote can cancel, so the ensemble gains more than its members lose, as
+the handout's explanation predicts.
+
+\paragraph{Hierarchy (Part 4).}
+The hierarchy is \both{hier}{loss} points below the flat tree (\both{hier}{test}\% against
+\both{dt}{test}\%). The experts are not the problem: given the true family they reach
+\both{t3}{oracle}\% (the oracle), and only \both{t3}{pa}\% of the rows are lost by an expert after
+correct routing. The router is the bottleneck. It sends \both{t3}{pb}\% of the rows to the wrong
+family, each then a certain species error, and its accuracy (\both{t3}{router}\%) is
+\both{hier}{router-loss} points below the family accuracy that the flat tree gets for free by
+mapping its predicted species. A likely reason: each family is a union of species clusters
+(Hylidae has five species, Leptodactylidae three), which one tree must carve out from the coarse
+labels alone. The small families suffer most: Bufonidae (\res{bufo-rows} test rows) is routed
+correctly only \both{hier}{bufo-recall}\% of the time and Dendrobatidae \both{hier}{dend-recall}\%,
+and since their experts are constants, routing is everything there. A perfect router would add
+\both{hier}{gap} points. On this dataset the easier sub-problems do not make up for the router's
+mistakes, so the hierarchy does not help.
+
+\paragraph{Naive Bayes (Part 5).}
+Naive Bayes is the weakest model (\res{nb-test}\%). It treats the 22 MFCCs as independent within
+each species, but they are not: within a species the mean $|r|$ between two features is
+\res{within-min} to \res{within-max}, and over the training set \res{corr-above} of the 231 pairs
+have $|r| > 0.5$, up to \res{corr-max}. Correlated features count the same evidence several
+times, which makes the posteriors overconfident and lets a block of related MFCCs outvote the
+rest; a tree uses one feature per split and is not misled by redundancy. A second effect is
+specific to this data: MFCC~\res{nb-constant-feature} is constant in every training row of
+\res{nb-constant-species}, so its variance there is only $\varepsilon = \res{nb-eps}$. The
+\res{nb-constant-shared} test rows that share that value gain a large likelihood bonus for the
+species: naive Bayes predicts it for \res{nb-constant-predicted} test rows,
+\res{nb-constant-wrong} of them wrongly.
+
+\end{document}
