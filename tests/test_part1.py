@@ -2,6 +2,7 @@
 weights, the tie rules, the stopping rules and the Random Forest hook."""
 
 import math
+import warnings
 
 import numpy as np
 import pytest
@@ -203,6 +204,19 @@ def test_training_rows_reach_the_leaves_they_were_fitted_in():
     for i, node in enumerate(tree.nodes):
         if node["feature"] < 0:
             assert reached[i] == node["n"]
+
+
+def test_rows_without_weight_give_no_nan():
+    # AdaBoost's weights can get too small to register after many rounds; zero weights are the
+    # extreme case. No division may produce nan, and the tree must still split.
+    rng = np.random.default_rng(7)
+    X, y = rng.normal(size=(200, 3)), rng.integers(0, 3, size=200)
+    w = rng.uniform(size=200) * (rng.uniform(size=200) > 0.3)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        tree = DecisionTree("entropy").fit(X, y, sample_weight=w)
+    assert tree.n_leaves > 1
+    assert all(np.isfinite(node["gain"]) for node in tree.nodes)
 
 
 def test_impurity_of_pure_and_uniform_nodes():

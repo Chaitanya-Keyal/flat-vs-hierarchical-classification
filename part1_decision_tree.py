@@ -16,6 +16,14 @@ TOL = 1e-12
 DEPTHS = (1, 2, 3, 5, 8, 12, None)
 
 
+def share(class_weights, total):
+    """Class weights over their total, so class probabilities. A side whose total is 0 (its
+    rows too light to register, as AdaBoost's weights get after many rounds) gets zeros, and
+    with its weight W_j = 0 it then adds nothing to the gain."""
+    total = total[..., None]
+    return np.divide(class_weights, total, out=np.zeros_like(class_weights), where=total > 0)
+
+
 def impurity(p, criterion):
     """Gini, 1 - sum p_i^2, or entropy in bits, -sum p_i log2 p_i with 0 log2 0 := 0, of the
     class probabilities p along the last axis."""
@@ -99,8 +107,8 @@ class DecisionTree:
         W, w_left, w_right = weights.sum(), left.sum(axis=2), right.sum(axis=2)
         gain = (
             impurity(weights / W, self.criterion)
-            - w_left / W * impurity(left / w_left[..., None], self.criterion)
-            - w_right / W * impurity(right / w_right[..., None], self.criterion)
+            - w_left / W * impurity(share(left, w_left), self.criterion)
+            - w_right / W * impurity(share(right, w_right), self.criterion)
         )
         gain[x[1:] == x[:-1]] = -np.inf  # thresholds lie between distinct values only
         best = gain.max()
