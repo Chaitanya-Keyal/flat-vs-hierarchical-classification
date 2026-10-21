@@ -4,17 +4,7 @@ import numpy as np
 
 from part1_decision_tree import DecisionTree
 from part2_bagging_boosting import AdaBoostSAMME, Bagging
-
-
-def blobs(seed, n=300, k=3):
-    """k overlapping Gaussian classes in 4 dimensions."""
-    rng = np.random.default_rng(seed)
-    y = rng.integers(0, k, size=n)
-    return rng.normal(size=(n, 4)) + y[:, None] * 0.8, y
-
-
-def nodes(tree):
-    return [(nd["feature"], nd["threshold"], nd["value"]) for nd in tree.nodes]
+from tests import blobs, nodes
 
 
 def test_bagging_trees_are_fitted_on_the_handout_bootstraps():
