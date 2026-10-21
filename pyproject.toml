@@ -32,6 +32,10 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM", "C4", "PIE", "RET", "PTH", "N", 
 # X, N, K, T and friends follow the handout's notation.
 ignore = ["N803", "N806"]
 
+[tool.ruff.lint.per-file-ignores]
+# The notebook puts the repo root on sys.path before it can import the parts.
+"notebooks/*" = ["E402"]
+
 [tool.pytest.ini_options]
 # The part scripts and common.py sit at the repo root and are imported from there.
 pythonpath = ["."]

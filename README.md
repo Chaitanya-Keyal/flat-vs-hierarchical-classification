@@ -26,6 +26,7 @@ results/                     part1.txt ... part5.txt (what each script prints), 
 report/results_matrix.tex    the source of results_matrix.pdf; its numbers come from results/numbers.tex
 tools/                       run_all.py (results/), build_pdf.py (results_matrix.pdf), package.py (the zip)
 tests/                       the handout's sanity checks, brute-force references, hand-built cases
+notebooks/demo.ipynb         the demo: each part's numbers and plots, by calling the part scripts
 pyproject.toml, uv.lock      dependencies; .python-version pins Python 3.12
 ```
 
@@ -37,6 +38,7 @@ in Part 1, which Parts 2 to 4 import.
 
 ```bash
 uv sync                      # numpy and pandas, plus pytest and ruff (the dev group)
+uv sync --group notebook     # adds JupyterLab and Matplotlib, for the demo notebook
 ```
 
 `uv.lock` pins every version. Tests, then formatting and lint:
@@ -95,7 +97,18 @@ of discussion are in `results_matrix.pdf`.
 | Hierarchical (router on Family, experts on Species) | 93.82 | 94.65 |
 | Gaussian naive Bayes | 90.34 | |
 
-## 6. Submission
+## 6. Demo
+
+```bash
+uv run --group notebook jupyter lab notebooks/demo.ipynb
+```
+
+The notebook has no logic of its own: it calls the classes in the part scripts, shows the matrix
+rows and adds plots (accuracy against depth, AdaBoost round by round, how alike the trees are,
+confusion matrices, the MFCC correlations), with a "Try it" cell per part for live changes. It is
+committed without outputs and takes about 90 s to run.
+
+## 7. Submission
 
 ```bash
 uv run python -m tools.package                  # dist/2023B4A70727H_A1.zip
