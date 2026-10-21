@@ -27,6 +27,7 @@ report/results_matrix.tex    the source of results_matrix.pdf; its numbers come 
 tools/                       run_all.py (results/), build_pdf.py (results_matrix.pdf), package.py (the zip)
 tests/                       the handout's sanity checks, brute-force references, hand-built cases
 notebooks/demo.ipynb         the demo: each part's numbers and plots, by calling the part scripts
+docs/notes/                  study notes: the maths, the code, the demo, likely viva questions
 pyproject.toml, uv.lock      dependencies; .python-version pins Python 3.12
 ```
 
