@@ -3,7 +3,7 @@ BITS F464 Machine Learning, Assignment 1: Flat vs. Hierarchical Classification F
 Group
   Chaitanya Keyal   2023B4A70727H
   Vishesh Agarwal   2023B4A70611H
-  TBD               TBD
+  Deeksha Thakur    2023B4A71257H
 
 Versions used
   Python 3.12.10, numpy 2.5.4, pandas 3.0.6. The code imports only numpy, pandas and the Python

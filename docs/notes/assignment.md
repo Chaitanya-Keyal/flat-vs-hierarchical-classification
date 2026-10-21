@@ -138,9 +138,6 @@ bottleneck. Naive Bayes is last: the MFCCs are far from independent within a spe
 - **Submission:** one zip named `<StudentID>_A1.zip`, ours `2023B4A70727H_A1.zip`. Build it with
   `uv run python -m tools.package`, or `uv run python -m tools.package ID1 ID2 ID3` for one zip
   per member. The CSV is not in the zip; the grader puts `Frogs_MFCCs.csv` next to the scripts.
-- **Before submitting:** the third member's name and ID go in `README.txt` and in
-  `report/results_matrix.tex`. Then rebuild with `uv run python -m tools.build_pdf`. The package
-  check refuses the TBD placeholder.
 - **Demo and viva:** 20 minutes per group on 27-29 October, at a time agreed with the TAs
   (f20231091@hyderabad.bits-pilani.ac.in, f20230390@hyderabad.bits-pilani.ac.in). See
   [demo.md](demo.md).

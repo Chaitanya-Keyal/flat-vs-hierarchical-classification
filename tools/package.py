@@ -4,13 +4,12 @@
     uv run python -m tools.package ID [ID ...]      one zip per student ID
     uv run python -m tools.package --python "CMD"   run the scripts with another interpreter, e.g.
         "uv run --no-project --python 3.9 --with numpy==1.26.4 --with pandas==2.2.3 python"
-    uv run python -m tools.package --draft          allow the TBD placeholder for the third member
 
 Each zip holds exactly the eight files the handout names, flat at its root. It is then checked:
 the scripts import only numpy, pandas, the standard library and each other; no prohibited
-library is named anywhere and no path is absolute; no placeholder is left; and, unzipped into an
-empty folder next to a copy of Frogs_MFCCs.csv, every script runs with one plain command and
-prints exactly what results/partN.txt recorded.
+library is named anywhere and no path is absolute; and, unzipped into an empty folder next to a
+copy of Frogs_MFCCs.csv, every script runs with one plain command and prints exactly what
+results/partN.txt recorded.
 """
 
 import argparse
@@ -58,7 +57,7 @@ def pdf_text(path):
     ).stdout
 
 
-def check_contents(folder, draft):
+def check_contents(folder):
     """Problems with the unzipped files, as messages."""
     problems = []
     texts = {name: (folder / name).read_text() for name in FILES if not name.endswith(".pdf")}
@@ -67,8 +66,6 @@ def check_contents(folder, draft):
         lowered = text.lower()
         problems += [f"{name} names {word}" for word in FORBIDDEN if word in lowered]
         problems += [f"{name} has an absolute path" for p in ("/home/", "c:\\") if p in lowered]
-        if not draft and "TBD" in text:
-            problems.append(f"{name} still has the TBD placeholder")
     for name in FILES:
         if name.endswith(".py"):
             for node in ast.walk(ast.parse(texts[name])):
@@ -106,7 +103,6 @@ def main():
     parser = argparse.ArgumentParser(description="Build and check the submission zip.")
     parser.add_argument("ids", nargs="*", default=["2023B4A70727H"], help="student IDs")
     parser.add_argument("--python", default=sys.executable, help="interpreter command")
-    parser.add_argument("--draft", action="store_true", help="allow the TBD placeholder")
     args = parser.parse_args()
     python = shlex.split(args.python)
 
@@ -117,7 +113,7 @@ def main():
         with tempfile.TemporaryDirectory() as tmp, zipfile.ZipFile(path) as zf:
             assert sorted(zf.namelist()) == sorted(FILES)
             zf.extractall(tmp)
-            problems = check_contents(Path(tmp), args.draft) + check_runs(Path(tmp), python)
+            problems = check_contents(Path(tmp)) + check_runs(Path(tmp), python)
         for problem in problems:
             print(f"  PROBLEM: {problem}")
         failed |= bool(problems)
