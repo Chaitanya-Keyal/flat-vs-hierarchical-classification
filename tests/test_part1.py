@@ -258,6 +258,15 @@ def test_features_are_drawn_at_every_searched_node():
     assert stub.draws == len(searched)
 
 
+def test_no_gain_among_the_drawn_features_makes_a_leaf():
+    # the stub only offers feature 0, which is constant: the node becomes a leaf with no second
+    # draw, although feature 1 would split it perfectly
+    X = np.column_stack([np.zeros(4), np.arange(4.0)])
+    stub = FirstFeatures()
+    tree = DecisionTree("gini", max_features=1, rng=stub).fit(X, np.array([0, 0, 1, 1]))
+    assert tree.n_leaves == 1 and stub.draws == 1
+
+
 def test_drawing_all_features_equals_no_subsetting():
     rng = np.random.default_rng(6)
     X, y = rng.integers(0, 4, size=(150, 5)).astype(float), rng.integers(0, 3, size=150)

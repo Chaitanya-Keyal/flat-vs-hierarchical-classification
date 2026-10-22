@@ -17,11 +17,22 @@ def test_estimates_follow_the_handout():
     X, y = blobs(0)
     nb = GaussianNB().fit(X, y)
     eps = 1e-9 * X.var(axis=0).max()
+    assert nb.epsilon_ == pytest.approx(eps, rel=1e-12)
     for k, c in enumerate(nb.classes_):
         rows = X[y == c]
         assert np.allclose(nb.mean_[k], rows.mean(axis=0))
-        assert np.allclose(nb.var_[k], ((rows - rows.mean(axis=0)) ** 2).mean(axis=0) + eps)
+        # rtol far below eps / var, so that a missing or wrong eps fails
+        raw = ((rows - rows.mean(axis=0)) ** 2).mean(axis=0)
+        np.testing.assert_allclose(nb.var_[k], raw + eps, rtol=1e-12, atol=0)
         assert nb.log_prior_[k] == pytest.approx(math.log(len(rows) / len(y)))
+
+
+def test_a_feature_constant_within_a_class_gets_epsilon_as_its_variance():
+    X, y = blobs(0)
+    X[y == 0, 2] = 0.5
+    nb = GaussianNB().fit(X, y)
+    assert nb.var_[0, 2] == nb.epsilon_ > 0
+    assert np.isfinite(nb.log_posterior(X)).all()
 
 
 def test_log_posterior_matches_a_loop():

@@ -44,7 +44,8 @@ def sanity_check():
     X, y = np.array([[0.0], [2.0], [10.0], [12.0]]), np.array([0, 0, 1, 1])
     nb = GaussianNB().fit(X, y)
     pred = nb.predict(np.array([[3.0], [9.0]]))
-    assert np.allclose(nb.mean_.ravel(), [1, 11]) and np.allclose(nb.var_.ravel(), 1)
+    assert np.allclose(nb.mean_.ravel(), [1, 11])
+    assert np.allclose(nb.var_.ravel(), 1 + 1e-9 * X.var(), rtol=0, atol=1e-15)  # 1 plus eps
     assert pred.tolist() == [0, 1]
     print("\nSanity check")
     print(

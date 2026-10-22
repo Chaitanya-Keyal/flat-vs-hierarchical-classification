@@ -65,12 +65,26 @@ def test_samme_with_two_classes_is_classic_adaboost():
     assert np.array_equal(samme.predict(Z), classic(Z))
 
 
-def test_samme_keeps_only_learners_better_than_chance():
+def test_samme_keeps_learners_up_to_its_multi_class_limit():
+    # K = 4: a learner is kept while eps < 1 - 1/4, so errors above 1/2, where binary AdaBoost
+    # would stop, are kept too, with alpha = ln((1 - eps) / eps) + ln(K - 1) still positive
     X, y = blobs(5, k=4)
     model = AdaBoostSAMME(30, "entropy", max_depth=2).fit(X, y)
-    assert len(model.trees_) == len(model.alphas_) == len(model.errors_) > 0
-    assert all(e < 1 - 1 / 4 for e in model.errors_)
+    e = np.array(model.errors_)
+    assert len(model.trees_) == len(model.alphas_) == len(e) == 30
+    assert (e > 1 / 2).any() and (e < 1 - 1 / 4).all()
+    assert np.allclose(model.alphas_, np.log((1 - e) / e) + np.log(3))
     assert all(a > 0 for a in model.alphas_)
+
+
+def test_a_perfect_learner_has_its_error_clipped():
+    # an unconstrained tree fits the training rows exactly: eps = 0 would make alpha infinite.
+    # Clipped to 1e-10 it stays finite; no weight changes, so every round fits the same tree.
+    X, y = blobs(1)
+    model = AdaBoostSAMME(3, "gini", max_depth=None).fit(X, y)
+    assert model.errors_ == [1e-10] * 3
+    assert np.allclose(model.alphas_, np.log((1 - 1e-10) / 1e-10) + np.log(2))
+    assert np.array_equal(model.predict(X), y)
 
 
 def test_samme_first_error_is_the_plain_error_rate():

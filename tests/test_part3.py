@@ -1,8 +1,10 @@
-"""The forest's per-split feature draws and the pairwise agreement of its trees."""
+"""The forest's one random stream, its per-split feature draws and the pairwise agreement of
+its trees."""
 
 import numpy as np
 import pytest
 
+from part1_decision_tree import DecisionTree
 from part2_bagging_boosting import Bagging
 from part3_random_forest import RandomForest, agreement
 from tests import blobs, nodes
@@ -25,11 +27,25 @@ def test_a_forest_drawing_every_feature_starts_like_bagging():
     assert nodes(forest.trees_[0]) == nodes(Bagging(3, "gini").fit(X, y).trees_[0])
 
 
-def test_a_forest_uses_many_features_even_with_one_per_split():
+def test_a_forest_replays_one_stream_of_bootstraps_and_draws():
+    # one RandomState(42) for the whole forest: tree 1's bootstrap, then its feature draws
+    # (depth first, left child first), then tree 2's bootstrap, and so on
+    X, y = blobs(4)
+    forest = RandomForest(4, "gini", 2).fit(X, y)
+    rng = np.random.RandomState(42)
+    for tree in forest.trees_:
+        rows = rng.randint(0, len(y), size=len(y))
+        expected = DecisionTree("gini", max_features=2, rng=rng).fit(X[rows], y[rows])
+        assert nodes(tree) == nodes(expected)
+
+
+def test_a_forest_draws_features_per_split_not_per_tree():
+    # with one feature per split, a subset drawn once per tree would leave each tree a single
+    # feature; drawn at every split, each tree uses several
     X, y = blobs(2)
     forest = RandomForest(10, "entropy", 1).fit(X, y)
-    used = {nd["feature"] for tree in forest.trees_ for nd in tree.nodes if nd["feature"] >= 0}
-    assert used == {0, 1, 2, 3}
+    for tree in forest.trees_:
+        assert len({nd["feature"] for nd in tree.nodes if nd["feature"] >= 0}) > 1
 
 
 def test_a_forest_refits_identically():

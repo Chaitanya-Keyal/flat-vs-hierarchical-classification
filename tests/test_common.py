@@ -1,4 +1,5 @@
-"""The fixed split, the species -> family map, accuracy, confusion matrices and votes."""
+"""The fixed split, the species -> family map, the scores, accuracy, confusion matrices and
+votes."""
 
 from collections import Counter
 
@@ -29,6 +30,19 @@ def test_species_map_comes_from_training_rows():
     assert len(data.family_of) == 10
     assert set(data.family_of.values()) == set(data.f_train)
     assert np.array_equal(data.families(data.y_test), data.f_test)
+
+
+class AlwaysHylaMinuta:
+    def predict(self, X):
+        return np.full(len(X), "HylaMinuta")
+
+
+def test_scores_derive_the_family_from_the_predicted_species():
+    data = Data()
+    train, test, family = data.scores(AlwaysHylaMinuta())
+    assert train == np.mean(data.y_train == "HylaMinuta")
+    assert test == np.mean(data.y_test == "HylaMinuta")
+    assert family == np.mean(data.f_test == "Hylidae")  # HylaMinuta's family
 
 
 def test_confusion_matrix_counts_pairs():
