@@ -56,6 +56,7 @@ class DecisionTree:
 
     def fit(self, X, y, sample_weight=None):
         X = np.ascontiguousarray(X, dtype=float)
+        self.n_features_ = X.shape[1]
         self.classes_, codes = np.unique(y, return_inverse=True)
         n = len(codes)
         w = np.full(n, 1 / n) if sample_weight is None else np.asarray(sample_weight, dtype=float)
@@ -127,6 +128,8 @@ class DecisionTree:
     def apply(self, X):
         """The leaf each row of X lands in; all rows move down the tree together."""
         X = np.asarray(X, dtype=float)
+        if X.ndim != 2 or X.shape[1] != self.n_features_:  # one row is X[i : i + 1]
+            raise ValueError(f"X must have shape (n, {self.n_features_}), not {X.shape}")
         node = np.zeros(len(X), dtype=int)
         active = np.flatnonzero(self.feature[node] >= 0)
         while active.size:

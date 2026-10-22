@@ -12,7 +12,6 @@ results/numbers.tex   the numbers report/results_matrix.tex quotes, as \resdef{k
 import contextlib
 import io
 import json
-import math
 import platform
 import sys
 import time
@@ -112,14 +111,12 @@ def macros(r):
         bag_test, ada_test = (row[3] for row in p2["rows"] if row[1].lower() == c)
         m[f"bag-{c}-gain"] = points(bag_test, single)
         m[f"ada-{c}-gain"] = points(ada_test, single)
-        for depth, key in ((3, "ada"), (1, "stumps")):
-            errors = p2["rounds"][f"{c}-{depth}"]["errors"]
-            m[f"{key}-{c}-rounds"] = str(len(errors))
-            m[f"{key}-{c}-eps-first"] = f"{errors[0]:.2f}"
-            m[f"{key}-{c}-eps-last"] = f"{errors[-1]:.2f}"
-            m[f"{key}-{c}-alpha-last"] = (
-                f"{math.log((1 - errors[-1]) / errors[-1]) + math.log(9):.2f}"
-            )
+        for depth, key in ((part2_bagging_boosting.BOOSTING_DEPTH, "ada"), (1, "stumps")):
+            kept = p2["rounds"][f"{c}-{depth}"]
+            m[f"{key}-{c}-rounds"] = str(len(kept["errors"]))
+            m[f"{key}-{c}-eps-first"] = f"{kept['errors'][0]:.2f}"
+            m[f"{key}-{c}-eps-last"] = f"{kept['errors'][-1]:.2f}"
+            m[f"{key}-{c}-alpha-last"] = f"{kept['alphas'][-1]:.2f}"
         m[f"stumps-{c}-test"] = pct(p2["stumps"][c]["test"])
         m[f"stumps-{c}-species"] = str(p2["stumps"][c]["species_predicted"])
         rf_test = p3["compare_test"][c][2]

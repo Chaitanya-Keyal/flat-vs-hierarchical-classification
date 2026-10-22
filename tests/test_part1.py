@@ -219,6 +219,16 @@ def test_rows_without_weight_give_no_nan():
     assert all(np.isfinite(node["gain"]) for node in tree.nodes)
 
 
+def test_predict_rejects_rows_of_another_width():
+    # a tree fitted on 2 features would read a wider X silently, by the wrong columns
+    X, y = np.array([[1.0, 0.0], [2.0, 0.0], [3.0, 1.0], [4.0, 1.0]]), np.array([0, 0, 1, 1])
+    tree = DecisionTree("gini").fit(X, y)
+    for bad in (X[:, :1], np.hstack([X, X]), X[0]):
+        with pytest.raises(ValueError):
+            tree.predict(bad)
+    assert tree.predict(X[:1]).tolist() == [0] and tree.predict(X.tolist()).tolist() == y.tolist()
+
+
 def test_impurity_of_pure_and_uniform_nodes():
     assert impurity(np.array([1.0, 0.0]), "entropy") == 0
     assert impurity(np.full(4, 0.25), "entropy") == pytest.approx(2)

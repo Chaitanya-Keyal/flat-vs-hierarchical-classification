@@ -32,6 +32,7 @@ class HierarchicalClassifier:
 
     def predict(self, X):
         """Route every row, then ask each expert once, for all the rows routed to it."""
+        X = np.asarray(X, dtype=float)
         family = self.predict_family(X)
         species = np.empty(len(X), dtype=object)  # object: no truncated names
         for name in np.unique(family):

@@ -24,6 +24,7 @@ def test_predict_matches_routing_each_row_alone():
     Z = toy(1)[0]
     one_by_one = [model.experts[model.router.predict(z[None])[0]].predict(z[None])[0] for z in Z]
     assert model.predict(Z).tolist() == one_by_one  # same order, names not truncated
+    assert model.predict(Z.tolist()).tolist() == one_by_one
 
 
 def test_experts_learn_the_species_of_their_true_family():

@@ -94,7 +94,7 @@ def main():
     rows = [("5. Gaussian Naive Bayes", "-", *data.scores(nb))]
     print_rows(rows)
     print("Family %: the family of each predicted species, by the training rows' species map.")
-    print(f"\nepsilon = 1e-9 * max_j Var_train(x_j) = {nb.epsilon_:.3e}")
+    print(f"\nepsilon = {nb.var_smoothing:g} * max_j Var_train(x_j) = {nb.epsilon_:.3e}")
     constant = list(zip(*np.nonzero(nb.var_ == nb.epsilon_)))  # zero variance before smoothing
     shared = {}
     for k, j in constant:

@@ -164,8 +164,8 @@ result is printed. X = [[0], [2], [10], [12]], y = [0, 0, 1, 1]:
 - x = 9: the mirror image, (9 − 1)² = 64 against (9 − 11)² = 4. Class 1, by 30 nats.
 - Equal priors and variances make it "nearest mean": the log-odds of class 0 is −10x + 60, zero
   at x = 6. ε is far too small to matter.
-- The asserts: means [1, 11], variances 1 (`np.allclose` tolerates the 2.6 × 10⁻⁸), predictions
-  [0, 1]. The printout "variances 1 + 2.6e-08" shows ε.
+- The asserts: means [1, 11], variances exactly 1 + 10⁻⁹ × 26 (to 10⁻¹⁵, so a missing or wrong ε
+  fails), predictions [0, 1]. The printout "variances 1 + 2.6e-08" shows ε.
 
 ### `print_correlations` and `within_class_correlation`
 
@@ -416,8 +416,9 @@ test accuracy would be tuning on the test set, which the handout forbids.
   (variances 2) and stops the script, and `test_estimates_follow_the_handout` fails. With the
   check skipped: 91.45% train, 90.34% test.
 - **Another var_smoothing**: pass it in `main`, `GaussianNB(var_smoothing=1e-6)`, and leave the
-  default at 1e-9. `sanity_check` uses the default, and from 1e-6 up its `np.allclose(var, 1)`
-  fails (ε = 2.6 × 10⁻⁵ on its data). Test % and test rows predicted Ameeregatrivittata:
+  default at 1e-9: `sanity_check` uses the default and checks that its variances are exactly
+  1 + 10⁻⁹ · 26, so another default stops the script. The ε line prints the value passed
+  (`epsilon = 1e-06 * max_j ...`). Test % and test rows predicted Ameeregatrivittata:
 
   | var_smoothing | 1e-12 | 1e-10 | 1e-9 | 1e-8 | 1e-6 | 1e-4 | 1e-3 | 1e-2 | 1e-1 | 1 |
   |---|---|---|---|---|---|---|---|---|---|---|

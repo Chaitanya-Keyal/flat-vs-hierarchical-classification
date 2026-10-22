@@ -11,6 +11,9 @@ import numpy as np
 from common import CRITERIA, Data, accuracy, header, pct, print_rows, tally
 from part1_decision_tree import DecisionTree
 
+# The handout's Table 1: trees per ensemble and the depth of the boosted trees
+BAGGING_T, BOOSTING_T, BOOSTING_DEPTH = 25, 50, 3
+
 
 class Bagging:
     """T unconstrained trees, each fitted on its own bootstrap sample of the N training rows,
@@ -85,9 +88,9 @@ def main():
     header("Part 2: bagging and AdaBoost (SAMME) on flat trees (predict Species)", data)
     X, y = data.X_train, data.y_train
     single = {c: DecisionTree(c).fit(X, y) for c in CRITERIA}
-    bagging = {c: Bagging(25, c).fit(X, y) for c in CRITERIA}
-    boosting = {c: AdaBoostSAMME(50, c, max_depth=3).fit(X, y) for c in CRITERIA}
-    stumps = {c: AdaBoostSAMME(50, c, max_depth=1).fit(X, y) for c in CRITERIA}
+    bagging = {c: Bagging(BAGGING_T, c).fit(X, y) for c in CRITERIA}
+    boosting = {c: AdaBoostSAMME(BOOSTING_T, c, BOOSTING_DEPTH).fit(X, y) for c in CRITERIA}
+    stumps = {c: AdaBoostSAMME(BOOSTING_T, c, max_depth=1).fit(X, y) for c in CRITERIA}
 
     rows = [("2a. Bagging", c.capitalize(), *data.scores(bagging[c])) for c in CRITERIA]
     rows += [("2b. AdaBoost", c.capitalize(), *data.scores(boosting[c])) for c in CRITERIA]
@@ -103,20 +106,26 @@ def main():
         accs = (test_acc(single[c]), test_acc(bagging[c]), test_acc(boosting[c]))
         print(f"{c.capitalize():<10}{pct(accs[0]):>12}{pct(accs[1]):>10}{pct(accs[2]):>10}")
 
-    print("\nAdaBoost rounds kept (of T = 50) and the weighted error eps of the kept trees")
+    print(
+        f"\nAdaBoost rounds kept (of T = {BOOSTING_T}) and the weighted error eps of the kept trees"
+    )
     print(f"{'Criterion':<10}{'max_depth':>10}{'rounds':>8}{'eps first':>11}{'last':>8}{'max':>8}")
     rounds = {}
-    for depth, models in ((3, boosting), (1, stumps)):
+    for depth, models in ((BOOSTING_DEPTH, boosting), (1, stumps)):
         for c in CRITERIA:
             errors = models[c].errors_
-            rounds[f"{c}-{depth}"] = {"rounds": len(errors), "errors": errors}
+            rounds[f"{c}-{depth}"] = {"errors": errors, "alphas": models[c].alphas_}
             print(
                 f"{c.capitalize():<10}{depth:>10}{len(errors):>8}{errors[0]:>11.4f}"
                 f"{errors[-1]:>8.4f}{max(errors):>8.4f}"
             )
 
-    print("\nDecision stumps (max_depth = 1, T = 50) against max_depth = 3 (not in the matrix)")
-    print(f"{'Criterion':<10}{'depth 3 test %':>16}{'stumps test %':>15}{'species predicted':>19}")
+    print(
+        f"\nDecision stumps (max_depth = 1, T = {BOOSTING_T}) against max_depth = "
+        f"{BOOSTING_DEPTH} (not in the matrix)"
+    )
+    deep = f"depth {BOOSTING_DEPTH} test %"
+    print(f"{'Criterion':<10}{deep:>16}{'stumps test %':>15}{'species predicted':>19}")
     stump_info = {}
     for c in CRITERIA:
         acc, predicted = test_acc(stumps[c]), len(np.unique(stumps[c].predict(data.X_test)))

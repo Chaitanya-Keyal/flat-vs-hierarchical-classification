@@ -246,6 +246,10 @@ while active.size:
   millisecond.
 - `predict(X)` is `classes_[value[apply(X)]]`. `n_leaves` counts `feature < 0`; `depth` is the
   largest node depth.
+- `apply` first checks that X is 2-D with the `n_features_` columns `fit` saw, and raises a
+  `ValueError` otherwise. Without the check, a tree fitted on 21 columns (MFCC 1 dropped) would
+  read the full 22-column test set by the wrong columns and print a silently wrong accuracy
+  (12% instead of 95%). One row is `X[i : i + 1]`, not `X[i]`.
 
 ### Complexity
 
@@ -520,8 +524,8 @@ Keep every new parameter's default equal to today's behaviour, so Parts 2 to 4, 
 
   Its argmax equals `predict` (both take the first maximum). For the unconstrained trees every
   leaf is pure, so every probability is 0 or 1; it says more with `max_depth`.
-- **Feature importances** (mean decrease in impurity). Set `self.n_features_ = X.shape[1]` in
-  `fit`, then:
+- **Feature importances** (mean decrease in impurity). `fit` already stores
+  `self.n_features_`, so:
 
   ```python
   def feature_importances(self):

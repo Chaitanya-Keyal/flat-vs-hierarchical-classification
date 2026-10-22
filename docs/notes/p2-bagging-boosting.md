@@ -481,12 +481,10 @@ len(np.unique(rows)) / len(y)  # 0.617: the first bootstrap's distinct rows
   ```
 
   `bagging[c].oob_accuracy(X, y)` gives 96.77 / 96.59. `RandomForest` inherits it.
-- **Another T or max_depth.** All in `main`: `Bagging(25, c)`,
-  `AdaBoostSAMME(50, c, max_depth=3)` and the stumps' `AdaBoostSAMME(50, c, max_depth=1)`. Also
-  fix the printed labels that hard-code them: "(of T = 50)", "(max_depth = 1, T = 50)",
-  "depth 3 test %", and the 3 and 1 in `for depth, models in ((3, boosting), (1, stumps))`. Do
-  not run `tools/run_all.py` after a demo change: it rewrites `results/`. The notebook's "Try it"
-  cell is the quickest route.
+- **Another T or max_depth.** Change `BAGGING_T`, `BOOSTING_T` or `BOOSTING_DEPTH` at the top
+  of `part2_bagging_boosting.py`: `main` builds the models and prints its labels from them (the
+  stumps keep `max_depth=1`). Do not run `tools/run_all.py` after a demo change: it rewrites
+  `results/`. The notebook's "Try it" cell is the quickest route.
   - A deeper weak learner needs fewer rounds: depth 5 with T = 20 gives 97.08% (Gini).
   - Long runs of depth-3 trees push some weights below rounding error: from round 85
     (entropy) or 111 (Gini) the largest weight is 10¹⁸ to 10²¹ times the smallest. At a cut
