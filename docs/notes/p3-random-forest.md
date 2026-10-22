@@ -273,8 +273,8 @@ def agreement(votes, n_classes):
 | Gini | 94.93 | 96.66 | 97.78 |
 | Entropy | 95.41 | 96.87 | 97.64 |
 
-- The forest is the best flat model: 1.11 / 0.76 points above bagging (16 / 11 more of the 1439
-  test rows right) and 2.85 / 2.22 above the single tree (41 / 32 rows). Family accuracy is
+- The forest is the best flat model: 1.12 / 0.77 points above bagging (16 / 11 more of the 1439
+  test rows right) and 2.85 / 2.23 above the single tree (41 / 32 rows). Family accuracy is
   98.40 / 98.19 (bagging 97.50 / 97.50, single tree 96.25 / 96.80): of the 32 / 34 species
   errors, 9 / 8 still land in the right family. Train 100.00 / 100.00.
 - Not because of 50 trees against 25 (not part of the submission): `Bagging(50, c)` gets

@@ -108,6 +108,10 @@ The forest is best, and the hierarchy loses to the flat tree because the router 
 bottleneck. Naive Bayes is last: the MFCCs are far from independent within a species. Page 2 of
 `results_matrix.pdf` gives the reasons, with numbers.
 
+A difference in points, here and in the PDF, subtracts the two printed values, so it matches the
+tables (`common.points`). Counted in test rows it is exact: bagging's 1.73 points over the single
+tree is 25 of the 1439 rows, 1.737 points.
+
 ## How we know the numbers are right
 
 - **225 tests** (`uv run pytest`):

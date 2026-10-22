@@ -82,8 +82,8 @@ def leakage():
 
 
 def points(a, b):
-    """a - b in percentage points, with a typeset minus sign when negative."""
-    return pct(a - b).replace("-", r"\textminus{}")
+    """common.points, with a typeset minus sign when negative."""
+    return common.points(a, b).replace("-", r"\textminus{}")
 
 
 def macros(r):

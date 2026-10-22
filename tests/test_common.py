@@ -5,7 +5,7 @@ from collections import Counter
 
 import numpy as np
 
-from common import Data, accuracy, confusion_matrix, load, stratified_split, tally
+from common import Data, accuracy, confusion_matrix, load, pct, points, stratified_split, tally
 
 
 def test_split_matches_the_handout():
@@ -43,6 +43,11 @@ def test_scores_derive_the_family_from_the_predicted_species():
     assert train == np.mean(data.y_train == "HylaMinuta")
     assert test == np.mean(data.y_test == "HylaMinuta")
     assert family == np.mean(data.f_test == "Hylidae")  # HylaMinuta's family
+
+
+def test_points_subtract_the_printed_values():
+    a, b = 1391 / 1439, 1366 / 1439  # 25 test rows apart: 1.737 points
+    assert (pct(a), pct(b), points(a, b), points(b, a)) == ("96.66", "94.93", "1.73", "-1.73")
 
 
 def test_confusion_matrix_counts_pairs():

@@ -117,6 +117,12 @@ def pct(x):
     return f"{100 * x:.2f}"
 
 
+def points(a, b):
+    """a - b in percentage points, taken from the two printed values so that it matches them."""
+    hundredths = int(pct(a).replace(".", "")) - int(pct(b).replace(".", ""))
+    return f"{hundredths / 100:.2f}"
+
+
 ROW = "{:<32}{:<10}{:>9}{:>9}{:>10}"
 
 

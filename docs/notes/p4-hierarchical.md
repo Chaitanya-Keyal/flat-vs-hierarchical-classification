@@ -10,7 +10,7 @@ A_overall = A_router − p_A. Test accuracy is 93.82 / 94.65% (Gini / entropy), 
 below the flat tree. The experts are fine: routed by the true family they reach 98.26 / 98.33%
 (the oracle) and lose only p_A = 1.25 / 0.97% after correct routing. The router is the
 bottleneck: it misroutes p_B = 4.93 / 4.38% (about 4× p_A), and it is 1.18 points below the family
-accuracy the flat tree gets for free. A perfect router would add 4.45 / 3.68 points. On this
+accuracy the flat tree gets for free. A perfect router would add 4.44 / 3.68 points. On this
 dataset the hierarchy does not help.
 
 Pairs a / b are Gini / entropy; numbers are on the 1439 test rows unless stated.
@@ -115,7 +115,7 @@ not in R the hierarchy is always wrong. Hence C = R ∩ O, and:
 
 Counts, Gini / entropy: |R| = 1368 / 1376, |C| = 1350 / 1362, |O| = 1414 / 1415. Failure A:
 18 / 14 rows; failure B: 71 / 63. Of the misrouted rows, the right expert would get 64 / 53
-right (the 4.45 / 3.68-point gap) and 7 / 10 wrong. 1 − A_oracle = 25 / 24 rows, i.e. 18 + 7
+right (the 4.44 / 3.68-point gap) and 7 / 10 wrong. 1 − A_oracle = 25 / 24 rows, i.e. 18 + 7
 and 14 + 10.
 
 ## The code (`part4_hierarchical.py`)
@@ -252,7 +252,7 @@ Test %, from `results/part4.txt`:
 | Oracle (A_oracle) | 98.26 | 98.33 |
 | (A) p_A: router right, expert wrong | 1.25 | 0.97 |
 | (B) p_B: router wrong | 4.93 | 4.38 |
-| A perfect router would add (A_oracle − A_overall) | 4.45 | 3.68 |
+| A perfect router would add (A_oracle − A_overall) | 4.44 | 3.68 |
 
 Training accuracy is 100.00% for the router, the hierarchy and the oracle, with both criteria.
 Every test number is optimistic for new recordings: 55 of the 60 recordings have syllables on
@@ -350,7 +350,7 @@ than specialisation gains.
    - Table 3: router, oracle, (A), (B);
    - per criterion: the identity line, the 4 × 4 (Hylidae ↔ Leptodactylidae), the per-family
      table (Bufonidae 71.43%; final = router recall for the constant experts);
-   - against the flat tree: bottleneck "router"; a perfect router would add 4.45 / 3.68;
+   - against the flat tree: bottleneck "router"; a perfect router would add 4.44 / 3.68;
    - the per-family rows, router / flat tree: the 17-row gap sits in Hylidae and
      Leptodactylidae.
 3. In the code: `predict` (mask write-back, object array), `fit_hierarchy` (`family == name` on

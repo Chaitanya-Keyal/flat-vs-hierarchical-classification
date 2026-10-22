@@ -7,7 +7,16 @@ flat tree of Part 1.
 
 import numpy as np
 
-from common import CRITERIA, Data, confusion_matrix, header, pct, print_confusion, print_rows
+from common import (
+    CRITERIA,
+    Data,
+    confusion_matrix,
+    header,
+    pct,
+    points,
+    print_confusion,
+    print_rows,
+)
 from part1_decision_tree import DecisionTree
 
 
@@ -171,7 +180,7 @@ def main():
     print("A perfect router would add oracle - overall: ", end="")
     print(
         ", ".join(
-            f"{c.capitalize()} {pct(test[c]['oracle'] - test[c]['overall'])}" for c in CRITERIA
+            f"{c.capitalize()} {points(test[c]['oracle'], test[c]['overall'])}" for c in CRITERIA
         )
     )
 

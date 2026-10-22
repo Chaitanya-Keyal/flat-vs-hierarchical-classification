@@ -276,7 +276,7 @@ The stumps' train accuracy is *not part of the submission*; everything else is p
 
 ### Bagging against the single tree
 
-- +1.74 / +1.46 points on test, and family accuracy 97.50 / 97.50 against 96.25 / 96.80: the
+- +1.73 / +1.46 points on test, and family accuracy 97.50 / 97.50 against 96.25 / 96.80: the
   variance of single trees averaged away. The equal family numbers are a coincidence: 1403 of the
   1439 rows each time, but not the same rows.
 - Out-of-bag accuracy is 96.77 / 96.59 (*not part of the submission*), within 0.3 points of the
@@ -285,7 +285,7 @@ The stumps' train accuracy is *not part of the submission*; everything else is p
 ### AdaBoost against the single tree
 
 - Boosting starts from a weak tree (79.22 / 84.50) and ends at the level of the full tree:
-  95.34 / 94.16, +0.42 / −1.25 points. Train is 97.52 / 96.35, a train-test gap of 2.2 points
+  95.34 / 94.16, +0.41 / −1.25 points. Train is 97.52 / 96.35, a train-test gap of 2.2 points
   against 5.07 / 4.59 for the full tree. After 50 rounds the ensemble still underfits a little:
   its remaining errors are mostly bias, the opposite of the full tree's.
 - Test after 1, 5, 10, 25, 50 rounds: 79.22, 85.68, 90.62, 93.54, 95.34 (Gini); 84.50, 90.62,
@@ -340,8 +340,8 @@ The stumps' train accuracy is *not part of the submission*; everything else is p
 2. While it runs, walk through `Bagging.fit` (the `RandomState` at the top, the handout's
    `randint` call), then `AdaBoostSAMME.fit` line by line against the handout's six steps, then
    `tally`.
-3. In the output, point at: the four matrix rows; bagging +1.74 / +1.46 over the single tree and
-   AdaBoost +0.42 / −1.25; the rounds table (50 of 50 kept, ε rising but below 0.9); stumps
+3. In the output, point at: the four matrix rows; bagging +1.73 / +1.46 over the single tree and
+   AdaBoost +0.41 / −1.25; the rounds table (50 of 50 kept, ε rising but below 0.9); stumps
    83.32 / 84.16 with 8 / 9 of 10 species.
 4. In `notebooks/demo.ipynb`, the Part 2 plot: the test accuracy of the vote after each round,
    and each round's ε against the 0.9 line, depth 3 against stumps. Its "Try it" cell,
