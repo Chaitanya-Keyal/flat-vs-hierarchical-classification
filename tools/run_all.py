@@ -1,6 +1,6 @@
 r"""Runs the parts as their scripts do and keeps what they print and return.
 
-    uv run python -m tools.run_all              all five parts (about two minutes)
+    uv run python -m tools.run_all              all five parts (about 90 s)
     uv run python -m tools.run_all part4 part5  some of them; the rest come from results.json
 
 results/partN.txt     what `python partN_*.py` prints, byte for byte (the zip check diffs these)

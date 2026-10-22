@@ -40,7 +40,9 @@ demo and viva on 27-29 October.
   | Naive Bayes | variance smoothing 1e-9 times the largest training variance |
 
 - **Randomness:** one fresh `np.random.RandomState(42)` per ensemble model, used for all of its
-  bootstraps and feature draws. Ours is created at the start of `fit`.
+  bootstraps and feature draws. Bagging and the forest create theirs at the start of `fit`;
+  AdaBoost draws no random numbers. The stream runs: bootstrap 1, the forest's feature draws in
+  tree 1, bootstrap 2, and so on (README.txt says so).
 - **Ties:** on gain, the lower feature index wins, then the lower threshold. In leaves and votes,
   the smallest label in sorted order wins. Candidate thresholds are midpoints between consecutive
   distinct values.
@@ -66,8 +68,8 @@ demo and viva on 27-29 October.
 
 ## Where each item lives
 
-The "Results matrix rows" block at the end of each script's output holds the numbers of the
-matrix. `results/partN.txt` is that output, verbatim.
+The "Results matrix rows" block in each script's output holds its rows of Table 2; Part 4 prints
+Table 3 under "Failure analysis". `results/partN.txt` is that output, verbatim.
 
 | Handout item | Code | Printed as |
 |---|---|---|

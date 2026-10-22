@@ -80,9 +80,9 @@ uv run python -m tools.run_all           # all five into results/, about 90 s
 uv run python -m tools.build_pdf         # results_matrix.pdf, with latexmk
 ```
 
-Every random draw comes from a `RandomState(42)` that each ensemble creates when fitted, and the
-scripts print nothing that varies between runs, so a rerun reproduces `results/` byte for byte;
-the PDF carries no build date, so it does too.
+Every random draw comes from the `RandomState(42)` that bagging and the forest each create when
+fitted (AdaBoost draws none), and the scripts print nothing that varies between runs, so a rerun
+reproduces `results/` byte for byte; the PDF carries no build date, so it does too.
 
 ## 5. Results
 
@@ -96,7 +96,8 @@ of discussion are in `results_matrix.pdf`.
 | AdaBoost (SAMME, 50 depth-3 trees) | 95.34 | 94.16 |
 | Random forest (50 trees, 4 features per split) | 97.78 | 97.64 |
 | Hierarchical (router on Family, experts on Species) | 93.82 | 94.65 |
-| Gaussian naive Bayes | 90.34 | |
+
+Gaussian naive Bayes has no splitting criterion: 90.34%.
 
 ## 6. Demo
 
