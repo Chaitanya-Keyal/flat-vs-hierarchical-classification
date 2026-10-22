@@ -14,7 +14,9 @@ everyone should have read every part's notes.
 - Charge the laptop and close everything else; Parts 2 and 3 are CPU-bound.
 - In the repo root, run `uv sync --group notebook`. Open `notebooks/demo.ipynb` in JupyterLab
   (`uv run --group notebook jupyter lab notebooks/demo.ipynb`) and run all its cells once, about
-  90 s, so the plots are already there.
+  90 s, so the plots are already there. The notebook reloads the part scripts before every cell,
+  so after a live edit to a script, rerun the cell that uses it, or run the script itself in the
+  terminal; a cell that ran before the edit shows the old numbers.
 - Run `uv run python -m tools.package` (about 90 s): it builds `dist/2023B4A70727H_A1.zip`,
   which the setup slot lists, and checks it once more.
 - Open `results_matrix.pdf`, the handout (`assignment.pdf`) and the five scripts in an editor.
@@ -72,6 +74,12 @@ Each one is a small edit or a notebook cell. The part notes give the code and wh
   - uniform priors;
   - ddof=1;
   - `predict_proba` with log-sum-exp.
+
+## After the slot
+
+- Run `git restore notebooks/demo.ipynb` before any commit: JupyterLab saves the outputs into the
+  notebook, and the repo keeps it without them.
+- Undo any live edits to the scripts (`git restore` them, or `git status` to see what changed).
 
 ## If something goes wrong
 

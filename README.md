@@ -105,10 +105,11 @@ Gaussian naive Bayes has no splitting criterion: 90.34%.
 uv run --group notebook jupyter lab notebooks/demo.ipynb
 ```
 
-The notebook has no logic of its own: it calls the classes in the part scripts, shows the matrix
-rows and adds plots (accuracy against depth, AdaBoost round by round, how alike the trees are,
-confusion matrices, the MFCC correlations), with a "Try it" cell per part for live changes. It is
-committed without outputs and takes about 90 s to run.
+The models and metrics all come from the part scripts. The notebook prints the matrix rows and
+adds plots (accuracy against depth, AdaBoost round by round, how alike the trees are, confusion
+matrices, the MFCC correlations), with a "Try it" cell per part for live changes. It reloads the
+scripts before every cell, so an edit to a script reaches the next cell run. It is committed
+without outputs; running every cell takes about 90 s.
 
 ## 7. Submission
 
