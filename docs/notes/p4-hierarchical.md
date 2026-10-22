@@ -58,7 +58,8 @@ expert predict its whole group in one call, and return the species in the origin
   router only separates 4 coarse groups.
 - *Capacity* (Babbar et al., NIPS 2013, Theorem 1). For a top-down classifier the generalisation
   error is at most the empirical (margin) loss, plus a capacity term proportional to
-  Σ |D(v)|(|D(v)| − 1) / √m over the non-leaf nodes v (|D(v)| = the number of children of v),
+  Σ |D(v)|(|D(v)| − 1) / √m over the non-leaf nodes v (|D(v)| = the number of children of v; m
+  is the paper's number of training examples, not the forest's m),
   plus a confidence term. Flat: one node with 10 children, 10 × 9 = 90. Ours: 4 × 3 (root) +
   5 × 4 (Hylidae) + 3 × 2 (Leptodactylidae) + 0 + 0 = 38. Capacity favours the hierarchy; the
   empirical loss favours flat, because a top-down classifier makes several decisions and an early
@@ -226,18 +227,23 @@ Returns the per-family numbers.
 ### The handout's three common mistakes
 
 1. *Experts trained on the predicted family.* `fit_hierarchy` slices by the true labels.
-   `test_experts_learn_the_species_of_their_true_family` checks that every expert's `classes_`
-   are exactly its family's species.
+   `test_experts_learn_the_species_of_their_true_family` adds copies of some rows under another
+   family, so the router cannot fit the training rows (on clean data it would, and the mistake
+   would change nothing), and checks that every expert's `classes_` are exactly its family's
+   species.
 2. *Every row through every expert, then keep one answer.* `predict` routes first, and each
    expert sees only its group. (With trees the answers would even match, but that is four
    passes over all rows, and not routing.)
+   `test_each_expert_is_called_once_on_the_rows_routed_to_it` wraps each expert and checks one
+   call per expert, with exactly the rows routed to it.
 3. *Grouped order.* The answers go back through the same mask.
    `test_predict_matches_routing_each_row_alone` compares `predict` with a per-row loop on a toy
    set whose names include `c_with_a_much_longer_name`, so it catches truncation too.
 
 The other three tests in `tests/test_part4.py`: a one-species family gets a constant expert; the
 failure fractions add up and A_overall ≤ A_oracle; a router that always says "B" makes every
-non-B row wrong (A_router = A_overall = 0, p_B = 1).
+non-B row wrong (A_router = A_overall = 0, p_B = 1), while the oracle still equals a per-row
+count of each row sent to its true family's expert.
 
 ## Results and what they mean
 
@@ -358,10 +364,12 @@ than specialisation gains.
    the true labels), the two asserts in `analyse`.
 4. In `results_matrix.pdf`: the shaded rows of Table 2, Table 3 and the paragraph "Hierarchy
    (Part 4)".
-5. `uv run pytest tests/test_part4.py`: 5 tests, under a second.
+5. `uv run pytest tests/test_part4.py`: 6 tests, under a second.
 6. Live checks in `uv run python` from the repo root (all run and checked):
 
 ```python
+from types import SimpleNamespace
+
 import numpy as np
 from common import Data, confusion_matrix
 from part4_hierarchical import HierarchicalClassifier, analyse, fit_hierarchy, oracle_predict
@@ -387,20 +395,14 @@ one == pred.tolist()  # True
 perm = np.random.default_rng(0).permutation(len(d.X_test))
 (m.predict(d.X_test[perm]) == pred[perm]).all()  # True
 
-# one call per expert: wrap the experts and record the group sizes
+# one call per expert: each wrapped expert records the size of every group it is given
+# (append returns None, so `or` hands back the expert's own answer)
 calls = []
-
-
-class Spy:
-    def __init__(self, expert):
-        self.expert = expert
-
-    def predict(self, X):
-        calls.append(len(X))
-        return self.expert.predict(X)
-
-
-HierarchicalClassifier(m.router, {f: Spy(e) for f, e in m.experts.items()}).predict(d.X_test)
+spies = {
+    f: SimpleNamespace(predict=lambda X, e=e: calls.append(len(X)) or e.predict(X))
+    for f, e in m.experts.items()
+}
+HierarchicalClassifier(m.router, spies).predict(d.X_test)
 calls  # [12, 103, 433, 891]
 
 # a wrong family never gives the right species
@@ -421,6 +423,15 @@ m.experts["Bufonidae"].n_leaves, m.experts["Bufonidae"].classes_  # 1, ['Rhinell
 - *What is a "local classifier per parent node"?* One multi-class classifier at every non-leaf
   node of the label tree, choosing among its children: the router at the root (4 families) and
   one expert per family (its species). Five trees per criterion here.
+- *What else does the survey (Silla and Freitas) describe?* Flat classification: predict the
+  leaf class and read off its ancestors, which is Part 1's derived family accuracy. A local
+  classifier per node: one binary classifier for every node but the root (here 14, for 4
+  families and 10 species), whose answers can disagree unless they are read top-down. A local
+  classifier per level: one multi-class classifier per level, here the router and a flat species
+  tree, which can also disagree (a species outside the predicted family). A global ("big-bang")
+  classifier: one model that learns the whole hierarchy at once. Ours, per parent node with a
+  species always predicted, is consistent by construction; the price is that errors propagate,
+  so a misrouted row can never recover.
 - *Why train the experts on the true family?* An expert models "which species, given family f",
   so it learns from family f's rows. Training on predicted families mixes in foreign species,
   ties the experts to the router and breaks the failure analysis. Here it would not even change
@@ -496,13 +507,22 @@ it to compare). Accuracy actually rises, from 91.31 / 91.80% with true-family ex
 not a lower score: the experts are no longer family experts, the model is not the hierarchy being
 evaluated, and p_A, p_B and the oracle lose their meaning.
 
-**A different router.** `HierarchicalClassifier` only calls `router.predict`, so only the router
-line in `fit_hierarchy` changes:
+**A different router.** `HierarchicalClassifier` only calls `router.predict`, so any model with a
+`predict` can route. In the script, change the router line in `fit_hierarchy`:
 
 ```python
 from part3_random_forest import RandomForest
 
 router = RandomForest(50, criterion, 4).fit(X, family)  # about 4 s per fit
+```
+
+and, in `main`, the leaves table, which reads `models[c].router.n_leaves` (only a tree has it):
+write `getattr(models[c].router, "n_leaves", "-")` there. Without editing anything, after the
+live checks above:
+
+```python
+forest = RandomForest(50, "gini", 4).fit(d.X_train, d.f_train)
+analyse(HierarchicalClassifier(forest, m.experts), d.X_test, d.f_test, d.y_test)  # router 0.9819
 ```
 
 Extra: router 98.19 / 98.12%, overall 96.80 / 96.87% (p_B 1.81 / 1.88%), above the single flat

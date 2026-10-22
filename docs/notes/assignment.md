@@ -116,16 +116,22 @@ tree is 25 of the 1439 rows, 1.737 points.
 
 ## How we know the numbers are right
 
-- **225 tests** (`uv run pytest`):
+- **233 tests** (`uv run pytest`):
   - the handout's sanity checks;
   - a slow brute-force split search that must pick the same feature, threshold and gain as the
-    vectorised one on 80 random problems full of ties, and a slow whole tree compared node by
-    node;
+    vectorised one on 40 random problems full of ties, each with both criteria, and a slow whole
+    tree compared node by node;
   - the same tree whatever the scale of the weights, and integer weights equal to duplicated rows;
-  - SAMME with two classes against classic AdaBoost;
-  - the routing order and the failure identity;
-  - naive Bayes against a plain loop;
+  - SAMME with two classes against classic AdaBoost, and with four classes its 1 − 1/K limit,
+    its exact α and the clipped ε of a perfect learner;
+  - the forest's single random stream, replayed tree by tree, and its draws per split;
+  - the routing order, one call per expert, experts on their true family, the oracle and the
+    failure identity;
+  - naive Bayes against a plain loop, with ε checked exactly;
   - and more besides.
+- **Mutation checks**, run outside the repo: the code was broken on purpose in 14 ways the
+  handout warns about (binary AdaBoost's stopping rule, one feature subset per tree, experts on
+  the predicted family, no ε, ...), and the tests fail on every one.
 - **An independent prototype**, written separately from the handout alone and thrown away, gave
   the same numbers in every cell of the matrix.
 - **A scikit-learn cross-check**, run outside the repo and never part of the submission:

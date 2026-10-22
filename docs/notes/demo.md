@@ -5,8 +5,8 @@
 Twenty minutes for three people. Spend about two minutes on the setup and the rules, two to
 three minutes per part, and leave the rest for questions and live changes. Run the scripts
 themselves, since they print exactly what the matrix says. Use the notebook for the plots and
-the "Try it" cells, and keep `results_matrix.pdf` open beside them. Parts 2 and 3 take about 40
-and 30 seconds, so start them first and talk while they run. Anyone may be asked anything, so
+the "Try it" cells, and keep `results_matrix.pdf` open beside them. Parts 2 and 3 take about 45
+and 35 seconds, so start them first and talk while they run. Anyone may be asked anything, so
 everyone should have read every part's notes.
 
 ## Before the slot
@@ -15,6 +15,8 @@ everyone should have read every part's notes.
 - In the repo root, run `uv sync --group notebook`. Open `notebooks/demo.ipynb` in JupyterLab
   (`uv run --group notebook jupyter lab notebooks/demo.ipynb`) and run all its cells once, about
   90 s, so the plots are already there.
+- Run `uv run python -m tools.package` (about 90 s): it builds `dist/2023B4A70727H_A1.zip`,
+  which the setup slot lists, and checks it once more.
 - Open `results_matrix.pdf`, the handout (`assignment.pdf`) and the five scripts in an editor.
 - Have a terminal in the repo root with `uv run python part1_decision_tree.py` typed and ready.
 
@@ -29,9 +31,10 @@ everyone should have read every part's notes.
 - **6:00-9:00: Part 2.** Start `part2_bagging_boosting.py`; while it runs, walk through
   `Bagging.fit`, then `AdaBoostSAMME.fit` line by line against the handout's six steps. The
   round-by-round plot: the error climbing towards 0.9, stumps falling behind.
-- **9:00-11:00: Part 3.** `RandomForest` is `Bagging` with `new_tree` overridden; the
-  draw happens in `DecisionTree._best_split`. The agreement plot: weaker, less alike trees make
-  a better vote.
+- **9:00-11:00: Part 3.** Start `part3_random_forest.py`; while it runs: `RandomForest` is
+  `Bagging` with `new_tree` overridden, and the draw happens in `DecisionTree._best_split`. Then
+  its two rows and the agreement table, and the agreement plot: weaker, less alike trees make a
+  better vote.
 - **11:00-14:00: Part 4.** Run the script: Table 3, the identity check, the
   confusion matrices, the per-family tables. In the code, `predict` groups rows by predicted
   family and calls each expert once. The router is the bottleneck. Its 17-row deficit against
@@ -74,7 +77,9 @@ Each one is a small edit or a notebook cell. The part notes give the code and wh
 
 - **The CSV is not found.** Run the scripts from the repo root, or from the folder that holds
   `Frogs_MFCCs.csv`.
-- **A script seems slow.** Part 2 takes about 40 s and Part 3 about 30 s on this laptop. That is
+- **A script seems slow.** Part 2 takes about 45 s and Part 3 about 35 s on this laptop. That is
   expected: they fit about 250 and 150 trees.
-- **Asked for numbers.** Every number in the PDF is in `results/partN.txt`; a rerun reproduces
-  them exactly.
+- **Asked for numbers.** Every number in Tables 2 and 3 is in `results/partN.txt`. Page 2's
+  differences, its last-round α values and the 55 of 60 recordings are worked out from the same
+  runs by `tools/run_all.py` and are in `results/numbers.tex`. A rerun reproduces all of them
+  exactly.

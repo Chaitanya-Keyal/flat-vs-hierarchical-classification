@@ -137,8 +137,9 @@ right = np.maximum(weights - left, 0)  # (n - 1, m, C)
    and since its W_j is 0 it adds nothing: no 0/0, no nan.
 4. `gain[x[1:] == x[:-1]] = -np.inf`: a cut between two equal values is no threshold. Identical
    rows (check (c)) therefore have no candidate at all.
-5. `best = gain.max()`, and `if not best > TOL: return None`. Written as `not >` so that −inf
-   (no candidate) gives "no split".
+5. `best = gain.max()`, and `if not best > TOL: return None`. Written as `not >` so that a nan
+   gain also means "no split" (nan compares False with everything, so `best <= TOL` would let it
+   through); −inf, no candidate at all, gives "no split" either way.
 6. The tie rule:
 
    ```python
@@ -206,8 +207,10 @@ Check (b) through the code (one feature, weights ¼): `left` = (¼, 0), (½, 0),
   first maximum, i.e. the smallest class index, and `classes_` is sorted, so ties go to the
   smallest label (`test_leaf_ties_go_to_the_smallest_label`). Internal nodes store a `value` too,
   which is handy for `predict_proba` or pruning.
-- Growth is depth first, left child first (README.txt records this). The order only sets the
-  node numbering; the tree is the same in any order.
+- Growth is depth first, left child first (README.txt records this). For a plain tree the order
+  only sets the node numbering. In the forest it decides which node gets which feature draw from
+  the shared random stream, so another order gives another forest (right child first: 97.43 /
+  97.43 instead of 97.78 / 97.64). That is why README.txt records it.
 
 ### The Random Forest hook: `max_features` and `rng`
 
@@ -226,8 +229,9 @@ features = np.sort(self.rng.choice(d, self.max_features, replace=False))
 - If none of the m drawn features has a positive gain, the node becomes a leaf; there is no
   second draw (the handout's rule).
 - Tests: a stub rng that always offers features 1 and 0 must give the tree grown on those two
-  features alone and draw exactly once per searched node; `max_features=d` must give the plain
-  tree.
+  features alone and draw exactly once per searched node; offered only a constant feature, a node
+  must stay a leaf after one draw (`test_no_gain_among_the_drawn_features_makes_a_leaf`);
+  `max_features=d` must give the plain tree.
 
 ### Flat arrays and the vectorised `apply` / `predict`
 
@@ -249,7 +253,8 @@ while active.size:
 - `apply` first checks that X is 2-D with the `n_features_` columns `fit` saw, and raises a
   `ValueError` otherwise. Without the check, a tree fitted on 21 columns (MFCC 1 dropped) would
   read the full 22-column test set by the wrong columns and print a silently wrong accuracy
-  (12% instead of 95%). One row is `X[i : i + 1]`, not `X[i]`.
+  (12% instead of 95%). One row is `X[i : i + 1]`, not `X[i]`
+  (`test_predict_rejects_rows_of_another_width`).
 
 ### Complexity
 
@@ -360,7 +365,7 @@ Hylidae species. Part 4's router (95.07 / 95.62) is measured against these 96.25
    where every split has two children.
 4. A second check: `DecisionTree('entropy', max_depth=1)` gives 2 leaves and 61.78% training
    accuracy; or work check (b) on paper with the table above.
-5. Optional: `uv run pytest tests/test_part1.py`, 198 tests in about a second. They include a
+5. Optional: `uv run pytest tests/test_part1.py`, 200 tests in about a second. They include a
    slow brute-force reference (a loop over every feature and midpoint) that the vectorised
    search must match, root and whole tree, on 40 random problems with both criteria.
 
@@ -437,6 +442,15 @@ Hylidae species. Part 4's router (95.07 / 95.62) is measured against these 96.25
 - *Why does a stump reach only about 61%?* It has 2 leaves, so it predicts at most 2 of the 10
   species; even the best stump could not beat the two largest classes, 63.92% of the training
   rows. It gets 60.98 / 61.78.
+- *Do the trees need feature scaling?* No. A split depends only on the order of each feature's
+  values. A strictly increasing transform keeps every training partition, and under linear
+  scaling the midpoints map onto each other, so the tree and its predictions are identical
+  (checked: standardising changes 0 of the 1439 test predictions). A nonlinear transform such as
+  x³ moves the midpoints, so a few test rows that fall in a gap can flip (6 / 9 here).
+- *Is this CART, ID3 or C4.5?* CART-style: binary splits x_j ≤ t on numeric features, midpoint
+  thresholds, Gini or entropy. With entropy the gain is ID3's information gain, not C4.5's gain
+  ratio, and C4.5 also splits categorical features many ways. There is no pruning (CART prunes
+  by cost-complexity, C4.5 by estimated error); only the handout's stopping rules apply.
 
 ## Likely code changes
 
@@ -477,7 +491,8 @@ Keep every new parameter's default equal to today's behaviour, so Parts 2 to 4, 
   test 94.09 / 95.48, 156 / 178 leaves.
 - **`max_leaf_nodes`.** Needs best-first growth: keep the candidate splits in a heap, keyed by the
   impurity they remove (gain × node weight), and always expand the best. Add
-  `max_leaf_nodes=None` to `__init__`, `import heapq` at the top, and replace `_grow` with:
+  `max_leaf_nodes=None` to `__init__` (and store it), `import heapq` at the top, and replace
+  `_grow` with:
 
   ```python
   def _grow(self, X, codes, onehot, rows, depth):
@@ -577,6 +592,6 @@ Keep every new parameter's default equal to today's behaviour, so Parts 2 to 4, 
   `(gain >= best - TOL).T`. Then: Gini test 94.86 instead of 94.93 and entropy 95.34 instead of
   95.41, one test row each; the split changes at 6 nodes of the Gini tree and 1 of the entropy
   tree, on gain differences of 1.4e-17 to 2.2e-16; with all weights 1 instead of 1/N the trees
-  change again (Gini test 95.00); and 16 of the 198 tests fail: 11 whole-tree brute-force
+  change again (Gini test 95.00); and 16 of the 200 Part 1 tests fail: 11 whole-tree brute-force
   comparisons (the reference keeps the 1e-12 rule) and 5 of the 10 weight-scale tests. Dropping
   TOL from the positivity check as well (`best > 0`) gives the same trees here.

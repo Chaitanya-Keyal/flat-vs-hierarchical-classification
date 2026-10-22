@@ -30,9 +30,12 @@ the submission (some are marked as a reminder).
   rows (N = 5756); the rest of its N slots are repeats. Our 25 bootstraps hold 61.7% to 64.0%
   (mean 63.0%).
 - Each training row is in 15.7 of the 25 bootstraps on average, and every row is in at least one.
-- A row drawn twice counts like a row of weight 2. So a bootstrap tree is a tree on the full data
-  with random integer weights, about 37% of them 0. The rows a tree never saw are its out-of-bag
-  (OOB) rows: a free validation set for that tree.
+- A row drawn k times counts like one row of weight k, so a bootstrap tree is the tree on the
+  rows drawn at least once, weighted by their counts (checked: identical). A weight of 0 is not
+  the same as leaving the row out: such rows still sit between the drawn values and move the
+  thresholds. On the full data with count weights, the first Gini bootstrap tree gets 93.12% test
+  against 93.61%. The rows a tree never saw are its out-of-bag (OOB) rows: a free validation set
+  for that tree.
 
 ### Why the vote helps
 
@@ -146,8 +149,8 @@ the submission (some are marked as a reminder).
 ### The update
 
 - Misses are multiplied by e^α, hits by e⁰ = 1, and then everything is divided by the total.
-  Classic AdaBoost's "hits × e^(−α), misses × e^α" differs only by a common factor, which the
-  normalisation removes.
+  Classic AdaBoost's "hits × e^(−α'), misses × e^(α')", with its own α' = α/2 (see K = 2 below),
+  differs only by a common factor, which the normalisation removes.
 - On the new weights, the tree just added has weighted error exactly 1 − 1/K. Its misses weigh
   ε·e^α = ε·(1 − ε)(K − 1)/ε = (1 − ε)(K − 1) and its hits 1 − ε, so the misses' share is
   (K − 1)/K. (Checked: 0.9 to within 4 × 10⁻¹⁶ after every update of all four runs.) The next
@@ -346,9 +349,10 @@ The stumps' train accuracy is *not part of the submission*; everything else is p
 4. In `notebooks/demo.ipynb`, the Part 2 plot: the test accuracy of the vote after each round,
    and each round's ε against the 0.9 line, depth 3 against stumps. Its "Try it" cell,
    `AdaBoostSAMME(20, "gini", max_depth=5)`, prints 20 rounds and 97.08% test.
-5. `uv run pytest tests/test_part2.py`: 7 tests in under a second (the handout's bootstraps,
-   identical refits, the majority vote, K = 2 is classic AdaBoost, kept trees beat chance, the
-   first ε is the plain error rate, the stop on XOR).
+5. `uv run pytest tests/test_part2.py`: 8 tests in under a second (the handout's bootstraps,
+   identical refits, the majority vote, K = 2 is classic AdaBoost, K = 4 keeps all 30 rounds with
+   errors above ½ and the exact α, a perfect learner's ε clipped to 10⁻¹⁰, the first ε is the
+   plain error rate, the stop on XOR).
 6. Live checks in `uv run python`, from the repo root:
 
 ```python
@@ -406,9 +410,10 @@ len(np.unique(rows)) / len(y)  # 0.617: the first bootstrap's distinct rows
 - *Show that K = 2 gives classic AdaBoost.* As derived above: α = 2α', the updates agree up to a
   common factor, and the vote difference is 2 Σ α'·h(x), which has classic's sign.
 - *What does T do?* Bagging: more trees never overfit, the accuracy levels off (96.32 / 96.66 at
-  10 trees, 96.59 / 97.08 at 50). AdaBoost: the training error keeps falling (bias), and test
-  follows for a while (Gini at T = 100: 95.55). Boosting can overfit eventually, slowly. T is
-  fixed by the handout.
+  10 trees, 96.59 / 97.08 at 50). AdaBoost: every round lowers the exponential loss on the
+  training rows (bias), but the training error itself wobbles (entropy: 96.92% train at round 41,
+  96.35% at 50, 95.26% at 75, 97.69% at 100), and test follows for a while (Gini at T = 100:
+  95.55). Boosting can overfit eventually, slowly. T is fixed by the handout.
 - *What is a learning rate?* α ← ν·α with 0 < ν ≤ 1: smaller steps, more rounds needed, often
   better generalisation. Ours is ν = 1, the handout's formula. At T = 50, ν = 0.5 gives
   94.79 / 95.00 and ν = 0.1 gives 94.37 / 93.54: too few rounds for such small steps.

@@ -87,7 +87,7 @@ The handout's rule, which the code implements term for term:
   about 5 × 10⁻³²⁴, so a log below about −745 becomes exactly 0. If that happens for every class,
   argmax of ten zeros returns class 0 whatever the data. In log space the product is a sum, and
   −2.8 × 10⁹ (the most negative score on our test set) is an ordinary number.
-- Honest detail: on this data the direct product would have worked for the test set. MFCC
+- In fact, on this data the direct product would have worked for the test set. MFCC
   variances are small (~10⁻³), so densities are often above 1, and every test row's best class
   has a log score of at least −129.55. Under 0.6% of the 14 390 (row, class) products underflow
   (the Ameeregatrivittata column for the 55 test rows with MFCC 1 ≠ 1.0, and 24 HylaMinuta
@@ -200,10 +200,11 @@ result is printed. X = [[0], [2], [10], [12]], y = [0, 0, 1, 1]:
 
 ### Tests
 
-`tests/test_part5.py`, 4 tests: the handout's sanity check; the estimates against the formulas
-written out (means, 1/n variances plus ε, log priors) on random blobs; the vectorised
-`log_posterior` against a triple loop over rows, classes and features; far-away points (x = 1000)
-giving finite scores.
+`tests/test_part5.py`, 5 tests: the handout's sanity check; the estimates against the formulas
+written out on random blobs (means, 1/n variances plus ε to a tolerance far below ε, so a missing
+or wrong ε fails, log priors); a feature constant within a class, whose variance must be exactly
+ε, with every score finite; the vectorised `log_posterior` against a triple loop over rows,
+classes and features; far-away points (x = 1000) giving finite scores.
 
 ## Results and what they mean
 
@@ -303,7 +304,7 @@ and joint log-likelihoods equal to within 2 × 10⁻⁶.
    (mean 0.30, max 0.91, 43 pairs); the within-species list (0.23 to 0.50).
 3. Show `fit` (one line per formula of the handout) and the three lines of `log_posterior` (the
    (n, K, d) broadcast).
-4. `uv run pytest tests/test_part5.py`: 4 passed, under a second.
+4. `uv run pytest tests/test_part5.py`: 5 passed, under a second.
 
 Live checks, in `uv run python` from the repo root:
 

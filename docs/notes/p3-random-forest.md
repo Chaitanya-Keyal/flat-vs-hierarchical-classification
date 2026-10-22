@@ -190,9 +190,10 @@ x = X[np.ix_(rows, features)]
   first near-best cut in column order": `near = (gain >= best - TOL).T` and `np.argmax(near)` scan
   feature by feature. `choice` returns the indices in random order; sorting makes column order
   equal index order. Ties are common deep in a tree: at a node with two rows of different species,
-  every feature that separates them gives the same gain. Without the sort, two tests fail
+  every feature that separates them gives the same gain. Without the sort, three tests fail
   (checked): `test_drawing_all_features_equals_no_subsetting` and
-  `test_features_are_drawn_at_every_searched_node`.
+  `test_features_are_drawn_at_every_searched_node` in `tests/test_part1.py`, and
+  `test_a_forest_drawing_every_feature_starts_like_bagging` in `tests/test_part3.py`.
 - **No positive gain: a leaf.** `_best_split` returns None when `not best > TOL` (TOL = 1e-12),
   and `_grow` leaves the node a leaf that predicts its majority. No second draw, as the handout
   says; sklearn would keep searching other features. Gini and entropy are strictly concave, so a
@@ -207,6 +208,12 @@ x = X[np.ix_(rows, features)]
   equal one grown on columns 0 and 1 alone, and the number of draws must equal the number of
   impure nodes (the ones that search). `test_drawing_all_features_equals_no_subsetting`: m = d with
   a real RandomState must give the full-search tree.
+  `test_no_gain_among_the_drawn_features_makes_a_leaf`: offered only a constant feature, the node
+  stays a leaf after exactly one draw.
+- In `tests/test_part3.py`, `test_a_forest_replays_one_stream_of_bootstraps_and_draws` rebuilds
+  every tree from one RandomState(42) in the order below and must match node for node, and
+  `test_a_forest_draws_features_per_split_not_per_tree` checks that each tree of an m = 1 forest
+  uses several features (a subset drawn once per tree would give it one).
 
 ### One random stream, in a fixed order
 
@@ -330,8 +337,7 @@ Not graded; from `results/part3.txt`:
 ## Demo
 
 1. Run `python part3_random_forest.py` from the folder with `Frogs_MFCCs.csv`
-   (`uv run python part3_random_forest.py` in the repo). About half a minute (28.6 s on the
-   machine these notes were checked on; README.txt says about 35 s). Most of it is the bagging
+   (`uv run python part3_random_forest.py` in the repo). About 35 s. Most of it is the bagging
    refit, about 11 s per criterion; each forest takes about 5 s despite twice the trees, because
    its nodes sort 4 columns, not 22. The output equals `results/part3.txt` byte for byte.
 2. Point at: line 3 (m = 4); the two matrix rows; the comparison table (single tree < bagging <
@@ -430,8 +436,8 @@ More, after `forest = RandomForest(50, "gini", 4).fit(X, y)`:
   redraw. It never happened in our forests (every leaf is pure); it needs the drawn features to be
   constant on the node.
 - *Why sort the drawn features?* Ties on gain go to the lower feature index, and the code takes
-  the first near-best column; sorting makes column order equal index order. Without it two tests
-  fail.
+  the first near-best column; sorting makes column order equal index order. Without it three
+  tests fail.
 - *Is the forest's edge over bagging real?* 16 / 11 test rows. It survives 50 bagged trees
   (96.59 / 97.08) and five other seeds (every forest beats every bagging run). The forest's
   Gini/entropy gap (0.14 points) is noise.
@@ -544,16 +550,19 @@ number moved).
       )
   ```
 
-  A depth limit stops nodes from searching, so they draw nothing and every later draw shifts:
-  every tree after the first changes, not just its bottom levels. Test % (T = 50, m = 4; not part
-  of the submission): depth 3: 87.21 / 87.84; 5: 92.49 / 93.75; 8: 96.87 / 97.15;
+  A depth limit stops nodes from searching, so they draw nothing and every later draw shifts.
+  Even the first tree is not the unconstrained one cut at the limit: after the first node that
+  stops there, its later nodes, above the limit too, get other draws (with max_depth=8 the first
+  difference is a node at depth 6), and every later tree gets another bootstrap. Test % (T = 50,
+  m = 4; not part of the submission): depth 3: 87.21 / 87.84; 5: 92.49 / 93.75; 8: 96.87 / 97.15;
   12: 97.50 / 97.85; unconstrained 97.78 / 97.64.
 - **Accuracy against T**, without refitting, from the prefix property (after the forests are
   fitted in `main`):
 
   ```python
-  votes = forest[c].votes(data.X_test)
-  for k in (1, 5, 10, 25, 50):
-      pred = forest[c].classes_[tally(votes[:k], len(forest[c].classes_)).argmax(axis=1)]
-      print(k, pct(accuracy(data.y_test, pred)))
+  for c in CRITERIA:
+      votes = forest[c].votes(data.X_test)
+      for k in (1, 5, 10, 25, 50):
+          pred = forest[c].classes_[tally(votes[:k], len(forest[c].classes_)).argmax(axis=1)]
+          print(c, k, pct(accuracy(data.y_test, pred)))
   ```
