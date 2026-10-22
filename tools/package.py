@@ -43,11 +43,15 @@ FORBIDDEN = ("sklearn", "scikit", "scipy", "statsmodels", "torch", "tensorflow",
 
 def stamp():
     """The date of the last commit that changed one of the files, in the committer's time zone,
-    so that the same commit always gives the same zip, byte for byte."""
+    so that the same commit of a full clone always gives the same zip, byte for byte (a shallow
+    clone may not hold that commit, and dates the files by its oldest one)."""
     command = ["git", "log", "-1", "--format=%cd", "--date=format:%Y %m %d %H %M %S", "--", *FILES]
-    run = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
-    if run.returncode != 0 or not run.stdout.strip():
-        return (1980, 1, 1, 0, 0, 0)  # no git: the earliest date a zip can hold
+    try:
+        run = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+    except OSError:  # git is not installed
+        run = None
+    if run is None or run.returncode != 0 or not run.stdout.strip():
+        return (1980, 1, 1, 0, 0, 0)  # no git history: the earliest date a zip can hold
     return tuple(int(v) for v in run.stdout.split())
 
 
@@ -63,17 +67,16 @@ def build(student_id):
     return path
 
 
-def pdf_text(path):
-    return subprocess.run(
-        ["pdftotext", path, "-"], check=True, capture_output=True, text=True
-    ).stdout
-
-
 def check_contents(folder):
     """Problems with the unzipped files, as messages."""
     problems = []
     texts = {name: (folder / name).read_text() for name in FILES if not name.endswith(".pdf")}
-    texts["results_matrix.pdf"] = pdf_text(folder / "results_matrix.pdf")
+    if shutil.which("pdftotext") is None:
+        print("  results_matrix.pdf: text NOT SCANNED, pdftotext (poppler-utils) is not installed")
+    else:
+        pdf = folder / "results_matrix.pdf"
+        run = subprocess.run(["pdftotext", pdf, "-"], check=True, capture_output=True, text=True)
+        texts["results_matrix.pdf"] = run.stdout
     for name, text in texts.items():
         lowered = text.lower()
         problems += [f"{name} names {word}" for word in FORBIDDEN if word in lowered]
@@ -103,7 +106,11 @@ def check_pdf():
         for name in ("report/results_matrix.tex", "results/numbers.tex"):
             (Path(tmp) / name).parent.mkdir(exist_ok=True)
             shutil.copyfile(ROOT / name, Path(tmp) / name)
-        fresh = build_pdf.build(Path(tmp) / "report").read_bytes()
+        try:
+            fresh = build_pdf.build(Path(tmp) / "report").read_bytes()
+        except build_pdf.BuildError as error:
+            print("  results_matrix.pdf: FAILED")
+            return [f"report/ does not build (run python -m tools.build_pdf for the log):\n{error}"]
     same = fresh == (ROOT / "results_matrix.pdf").read_bytes()
     print(f"  results_matrix.pdf: {'ok' if same else 'FAILED'}")
     return [] if same else ["results_matrix.pdf is out of date: run python -m tools.build_pdf"]

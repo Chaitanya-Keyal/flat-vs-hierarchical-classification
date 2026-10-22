@@ -13,24 +13,33 @@ REPORT = ROOT / "report"
 COMMAND = ["latexmk", "-pdf", "-interaction=nonstopmode", "-halt-on-error", "-outdir=build"]
 
 
+class BuildError(Exception):
+    """latexmk failed; the message holds LaTeX's error lines."""
+
+
 def build(report):
-    """Run latexmk in the folder `report` and return the PDF it wrote. On a LaTeX error, stop
-    and show the error from the log."""
+    """Run latexmk in the folder `report` and return the PDF it wrote. On a LaTeX error, or a
+    number missing from results/numbers.tex, raise BuildError with the lines that say why."""
     run = subprocess.run([*COMMAND, "results_matrix.tex"], cwd=report, capture_output=True)
     log = report / "build" / "results_matrix.log"
+    lines = log.read_text(errors="replace").splitlines() if log.exists() else []
     if run.returncode != 0:
-        lines = log.read_text(errors="replace").splitlines() if log.exists() else []
         first = next((i for i, line in enumerate(lines) if line.startswith("!")), None)
-        error = "\n".join(lines[first : first + 3]) if first is not None else "(no error line)"
-        raise SystemExit(f"latexmk failed:\n{error}\nThe full log is {log}")
+        raise BuildError("\n".join(lines[first : first + 3]) if first is not None else "no log")
+    missing = [line for line in lines if line.startswith("MISSING NUMBER")]
+    if missing:  # the PDF shows ?? in their place
+        raise BuildError("\n".join(missing))
     return report / "build" / "results_matrix.pdf"
 
 
 def main():
-    pdf = build(REPORT)
-    text = subprocess.run(["pdftotext", pdf, "-"], check=True, capture_output=True, text=True)
-    if "??" in text.stdout:
-        raise SystemExit("results_matrix.pdf has ?? where a number is missing")
+    try:
+        pdf = build(REPORT)
+    except BuildError as error:
+        log = REPORT / "build" / "results_matrix.log"
+        raise SystemExit(
+            f"results_matrix.pdf not written:\n{error}\nThe full log is {log}"
+        ) from None
     shutil.copyfile(pdf, ROOT / "results_matrix.pdf")
     print(f"wrote {(ROOT / 'results_matrix.pdf').relative_to(ROOT)}")
 

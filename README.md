@@ -80,9 +80,10 @@ uv run python -m tools.run_all           # all five into results/, about 90 s
 uv run python -m tools.build_pdf         # results_matrix.pdf, with latexmk
 ```
 
-Every random draw comes from the `RandomState(42)` that bagging and the forest each create when
-fitted (AdaBoost draws none), and the scripts print nothing that varies between runs, so a rerun
-reproduces `results/` byte for byte; the PDF carries no build date, so it does too.
+Every random draw comes from a `RandomState(42)`: the handout's `stratified_split` makes one for
+the split, and bagging and the forest each make their own when fitted (AdaBoost draws none). The
+scripts print nothing that varies between runs, so a rerun reproduces `results/` byte for byte;
+the PDF carries no build date, so it does too.
 
 ## 5. Results
 
@@ -119,9 +120,10 @@ uv run python -m tools.package ID [ID ...]      # one zip per student ID
 ```
 
 Each zip holds the eight files the handout names, dated by the last commit that changed one of
-them, so the same commit always gives the same bytes. The script first rebuilds the PDF in an
-empty folder and checks that it matches `results_matrix.pdf` byte for byte (skipped, with a
-warning, where latexmk is missing). It then unzips each zip into an empty folder, adds the CSV,
+them, so the same commit of a full clone always gives the same bytes. The script first rebuilds
+the PDF in an empty folder and checks that it matches `results_matrix.pdf` byte for byte (skipped,
+with a warning, where latexmk is missing; the scan of the PDF's text below needs pdftotext, from
+poppler-utils, and is skipped the same way). It then unzips each zip into an empty folder, adds the CSV,
 runs every part with a plain `python partN_*.py`, and checks the output against `results/` byte
 for byte. It also checks the imports against an allow-list and that no prohibited library is
 named anywhere. `--python "CMD"` runs the scripts under another interpreter instead, e.g.

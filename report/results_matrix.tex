@@ -27,11 +27,13 @@
 \setlength{\parskip}{4pt}
 
 % Every number comes from results/numbers.tex, which `python -m tools.run_all` writes from what
-% the part scripts compute and print; a mistyped key prints a bold ??.
+% the part scripts compute and print; a mistyped key prints a bold ?? and logs MISSING NUMBER.
 \makeatletter
 \newcommand{\resdef}[2]{\@namedef{res@#1}{#2}}
-\newcommand{\res}[1]{\@ifundefined{res@#1}{\textbf{??}}{\@nameuse{res@#1}}}
-\newcommand{\resrows}[1]{\@ifundefined{res@#1}{\textbf{??} \\}{\@nameuse{res@#1}}}
+\newcommand{\res}[1]{\@ifundefined{res@#1}{\typeout{MISSING NUMBER #1}\textbf{??}}%
+  {\@nameuse{res@#1}}}
+\newcommand{\resrows}[1]{\@ifundefined{res@#1}{\typeout{MISSING NUMBER #1}\textbf{??} \\}%
+  {\@nameuse{res@#1}}}
 \makeatother
 \input{../results/numbers.tex}
 
