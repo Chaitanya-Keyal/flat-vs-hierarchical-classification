@@ -18,7 +18,7 @@ How to run
                                                    single tree; AdaBoost rounds; stumps
     python part3_random_forest.py      about 35 s  Random Forest rows; against the single tree
                                                    and bagging; agreement between the trees
-    python part4_hierarchical.py       about 3 s   Hierarchical rows and Table 3; confusion
+    python part4_hierarchical.py       about 2 s   Hierarchical rows and Table 3; confusion
                                                    matrices; per-family accuracy; against the
                                                    flat tree
     python part5_naive_bayes.py        about 1 s   Gaussian Naive Bayes row; sanity check;

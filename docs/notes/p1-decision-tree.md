@@ -138,8 +138,9 @@ right = np.maximum(weights - left, 0)  # (n - 1, m, C)
 4. `gain[x[1:] == x[:-1]] = -np.inf`: a cut between two equal values is no threshold. Identical
    rows (check (c)) therefore have no candidate at all.
 5. `best = gain.max()`, and `if not best > TOL: return None`. Written as `not >` so that a nan
-   gain also means "no split" (nan compares False with everything, so `best <= TOL` would let it
-   through); −inf, no candidate at all, gives "no split" either way.
+   gain also means "no split": `nan > TOL` is False, like every ordered comparison with nan, so
+   `best <= TOL` (also False) would let it through. −inf, no candidate at all, gives "no split"
+   either way.
 6. The tie rule:
 
    ```python
@@ -526,7 +527,9 @@ Keep every new parameter's default equal to today's behaviour, so Parts 2 to 4, 
   ```
 
   Unlimited, it grows the same tree (same predictions; the nodes are numbered differently, which
-  `apply` does not care about). 50 leaves: test 93.33 / 92.98; 100 leaves: 94.02 / 95.00. With
+  `apply` does not care about). 50 leaves: test 93.33 / 92.98; 100 leaves: 94.02 / 95.00. The
+  tests that compare trees node by node in pre-order then fail, 64 of them (63 brute-force whole
+  trees and one weights test), although no prediction changes. With
   `max_features`, nodes now draw their features in best-first order instead of pre-order, so a
   forest built on it would change even without a limit.
 - **`predict_proba`.** In `fit`, add `"weights"` to the keys copied into flat arrays, then:

@@ -449,8 +449,8 @@ More, after `forest = RandomForest(50, "gini", 4).fit(X, y)`:
 
 Anything that changes what `part3_random_forest.py` prints breaks the zip check of
 `tools/package.py`, which compares the output with `results/part3.txt`. To keep such a change,
-rerun `uv run python -m tools.run_all part3` (and `uv run python -m tools.build_pdf` if a matrix
-number moved).
+rerun `uv run python -m tools.run_all part3`, then `uv run python -m tools.build_pdf`: the PDF
+quotes Part 3's numbers too, and `tools/package.py` checks it against a fresh build.
 
 - **Per-tree feature subsets**, to compare with per split. In `part3_random_forest.py` (import
   `N_FEATURES` from `common`): a stand-in for the RandomState that offers the same features at
@@ -551,11 +551,12 @@ number moved).
   ```
 
   A depth limit stops nodes from searching, so they draw nothing and every later draw shifts.
-  Even the first tree is not the unconstrained one cut at the limit: after the first node that
-  stops there, its later nodes, above the limit too, get other draws (with max_depth=8 the first
-  difference is a node at depth 6), and every later tree gets another bootstrap. Test % (T = 50,
-  m = 4; not part of the submission): depth 3: 87.21 / 87.84; 5: 92.49 / 93.75; 8: 96.87 / 97.15;
-  12: 97.50 / 97.85; unconstrained 97.78 / 97.64.
+  The first tree with a node stopped at the limit is not the unconstrained one cut there: after
+  that node, its later nodes, above the limit too, get other draws (with max_depth=8 the first
+  tree already differs at a node of depth 6), and every later tree gets another bootstrap. (With
+  entropy at max_depth=12 the first tree is only 12 deep, so it and the second bootstrap stay the
+  same.) Test % (T = 50, m = 4; not part of the submission): depth 3: 87.21 / 87.84; 5: 92.49 /
+  93.75; 8: 96.87 / 97.15; 12: 97.50 / 97.85; unconstrained 97.78 / 97.64.
 - **Accuracy against T**, without refitting, from the prefix property (after the forests are
   fitted in `main`):
 

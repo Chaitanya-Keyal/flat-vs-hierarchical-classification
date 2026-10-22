@@ -9,9 +9,9 @@ trees cuts variance: test accuracy rises from 94.93 / 95.41 (single tree, Gini /
 rows the earlier trees got wrong, and lets each tree vote with its say
 α = ln((1 − ε)/ε) + ln(K − 1). The ln 9 keeps α positive for any weighted error ε below 0.9, the
 error of guessing among 10 classes. Boosting cuts bias: one depth-3 tree gets 79.22 / 84.50, the
-50-tree vote 95.34 / 94.16, about the level of the single full tree. All 50 rounds are kept; ε
-rises from 0.21 / 0.16 to 0.60 / 0.49 as the weight piles onto the hard rows. Stumps name only two
-species per round and reach 83.32 / 84.16.
+50-tree vote 95.34 / 94.16, +0.41 / −1.25 points against the single full tree. All 50 rounds are
+kept; ε rises from 0.21 / 0.16 to 0.60 / 0.49 as the weight piles onto the hard rows. Stumps name
+only two species per round and reach 83.32 / 84.16.
 
 Pairs a / b are Gini / entropy throughout. `part2_bagging_boosting.py` prints the matrix rows,
 the single tree's test accuracy, ε first / last / max and the stump results (all kept in
@@ -254,8 +254,10 @@ the submission (some are marked as a reminder).
 
 ### `main()`
 
-- `Data()`: the handout's split. For each criterion it fits the Part 1 tree, `Bagging(25, c)`,
-  `AdaBoostSAMME(50, c, max_depth=3)` and the stumps, `AdaBoostSAMME(50, c, max_depth=1)`.
+- `Data()`: the handout's split. For each criterion it fits the Part 1 tree,
+  `Bagging(BAGGING_T, c)`, `AdaBoostSAMME(BOOSTING_T, c, BOOSTING_DEPTH)` and the stumps,
+  `AdaBoostSAMME(BOOSTING_T, c, max_depth=1)`, with the constants (25, 50, 3) at the top of the
+  file.
 - It prints the four matrix rows (`data.scores`: train, test, and the family accuracy derived
   from the predicted species through the training rows' species → family map); test % against
   the single tree; the rounds kept, with ε first / last / max; and stumps against depth 3, with
@@ -287,10 +289,11 @@ The stumps' train accuracy is *not part of the submission*; everything else is p
 
 ### AdaBoost against the single tree
 
-- Boosting starts from a weak tree (79.22 / 84.50) and ends at the level of the full tree:
-  95.34 / 94.16, +0.41 / −1.25 points. Train is 97.52 / 96.35, a train-test gap of 2.2 points
-  against 5.07 / 4.59 for the full tree. After 50 rounds the ensemble still underfits a little:
-  its remaining errors are mostly bias, the opposite of the full tree's.
+- Boosting starts from a weak tree (79.22 / 84.50) and ends near the full tree: 95.34 / 94.16,
+  +0.41 / −1.25 points, so a little above it with Gini and below it with entropy. Train is
+  97.52 / 96.35, a train-test gap of 2.2 points against 5.07 / 4.59 for the full tree. After 50
+  rounds the ensemble still underfits a little: its remaining errors are mostly bias, the
+  opposite of the full tree's.
 - Test after 1, 5, 10, 25, 50 rounds: 79.22, 85.68, 90.62, 93.54, 95.34 (Gini); 84.50, 90.62,
   92.08, 93.40, 94.16 (entropy) (*not part of the submission*, except at 50).
 - The curve wobbles. Over rounds 30 to 50 the test accuracy moves between 93.54 and 95.41 (Gini)

@@ -269,7 +269,8 @@ finite scores.
   (4.67 × 10⁻⁵ to 2.37 × 10⁻²) and get +0.93 (Rhinellagranulosa) to +4.06 (HylaMinuta). So
   every row with MFCC 1 = 1.0 (5563 of the 5756 training rows) gets 6.7 to 9.8 nats towards
   Ameeregatrivittata from this one feature, a likelihood ratio of about 800 to 19 000. A row with
-  any other value pays at least 1.75 × 10⁶ nats and is never predicted Ameeregatrivittata.
+  any other value pays at least 2.5 × 10⁵ nats (1.75 × 10⁶ on the test set) and is never
+  predicted Ameeregatrivittata.
 - The root cause is the Gaussian shape: MFCC 1 is a point mass at 1.0 plus a tail below it. As a
   discrete probability, P(MFCC 1 = 1.0 | c) is 1.000 for Ameeregatrivittata against 0.987 for
   AdenomeraAndre, almost no evidence; the fitted densities turn it into e^8.62 ≈ 5500.

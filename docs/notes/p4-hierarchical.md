@@ -127,6 +127,7 @@ It imports `DecisionTree` from Part 1 and the shared helpers from `common.py`; o
 
 ```python
 def predict(self, X):
+    X = np.asarray(X, dtype=float)  # so a list of rows works too
     family = self.predict_family(X)
     species = np.empty(len(X), dtype=object)  # object: no truncated names
     for name in np.unique(family):
@@ -235,7 +236,8 @@ Returns the per-family numbers.
    expert sees only its group. (With trees the answers would even match, but that is four
    passes over all rows, and not routing.)
    `test_each_expert_is_called_once_on_the_rows_routed_to_it` wraps each expert and checks one
-   call per expert, with exactly the rows routed to it.
+   call per expert, with as many rows as were routed to it (the per-row test below checks which
+   rows).
 3. *Grouped order.* The answers go back through the same mask.
    `test_predict_matches_routing_each_row_alone` compares `predict` with a per-row loop on a toy
    set whose names include `c_with_a_much_longer_name`, so it catches truncation too.
@@ -485,7 +487,8 @@ m.experts["Bufonidae"].n_leaves, m.experts["Bufonidae"].classes_  # 1, ['Rhinell
 
 All in `part4_hierarchical.py`. Numbers marked *extra* come from throwaway runs, not from the
 submission. If a change is kept, rerun `uv run python -m tools.run_all` so that `results/`
-matches again: `tools/package.py` diffs every script's output against it byte for byte.
+matches again, then `uv run python -m tools.build_pdf`: `tools/package.py` diffs every script's
+output against `results/` byte for byte, and the PDF against a fresh build from it.
 
 **Train the experts on the predicted family** (the handout's first mistake). In `fit_hierarchy`:
 
@@ -521,6 +524,8 @@ write `getattr(models[c].router, "n_leaves", "-")` there. Without editing anythi
 live checks above:
 
 ```python
+from part3_random_forest import RandomForest
+
 forest = RandomForest(50, "gini", 4).fit(d.X_train, d.f_train)
 analyse(HierarchicalClassifier(forest, m.experts), d.X_test, d.f_test, d.y_test)  # router 0.9819
 ```
