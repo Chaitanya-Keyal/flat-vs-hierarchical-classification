@@ -34,8 +34,9 @@ everyone should have read every part's notes.
   a better vote.
 - **11:00-14:00: Part 4.** Run the script: Table 3, the identity check, the
   confusion matrices, the per-family tables. In the code, `predict` groups rows by predicted
-  family and calls each expert once. The router is the bottleneck, and its deficit against the
-  flat tree sits in the two large families.
+  family and calls each expert once. The router is the bottleneck. Its 17-row deficit against
+  the flat tree is mostly in the two large families: Gini 9 Hylidae and 9 Leptodactylidae (one
+  row back on Bufonidae), entropy 3 and 9, plus 4 in Dendrobatidae and 1 in Bufonidae.
 - **14:00-16:00: Part 5.** Run the script: the sanity check, the row, the
   correlation matrix. The Ameeregatrivittata column of the confusion matrix, and why its MFCC 1
   variance is epsilon.

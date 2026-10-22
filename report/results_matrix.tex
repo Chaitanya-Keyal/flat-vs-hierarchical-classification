@@ -126,7 +126,7 @@ Tables~2 and~3 is printed by \texttt{part1\_decision\_tree.py} to \texttt{part5\
 
 Pairs of numbers \textit{a}\,/\,\textit{b} are Gini\,/\,entropy; accuracies are on the test set
 unless stated otherwise. \res{rec-both} of the \res{rec-total} recordings have syllables on both
-sides of the split, so every accuracy here is optimistic for new recordings (the handout's caveat).
+sides of the split, so every accuracy here is optimistic for new recordings.
 
 \paragraph{Single tree (Part 1).}
 Grown without limits, both trees fit the training set exactly (100\%; depth
@@ -157,8 +157,8 @@ Bagging 25 trees gains \both{bag}{gain} points over the single tree. Each tree o
 bootstrap sample differently, and the vote averages those errors away (variance reduction);
 training accuracy stays at \both{bag}{train}\%, since a row that only a minority of the trees saw
 can still be outvoted. AdaBoost attacks bias instead: one depth-3 tree reaches
-\both{sweep}{3-test}\% (Table~4), and 50 reweighted rounds lift that to \both{ada}{test}\%, about
-the single unconstrained tree (\both{ada}{gain} points). All 50 rounds were kept: the weighted
+\both{sweep}{3-test}\% (Table~4), and 50 reweighted rounds lift that to \both{ada}{test}\%,
+\both{ada}{gain} points against the single unconstrained tree. All 50 rounds were kept: the weighted
 error grows from \both{ada}{eps-first} to \both{ada}{eps-last} as the weights move onto the hard
 rows, but stays below the limit $1 - 1/K = 0.9$. Decision stumps reach only
 \both{stumps}{test}\%. A stump has two leaves, so it names at most two of the ten species per
@@ -173,8 +173,7 @@ The forest is the best flat model: \both{rf}{test}\%, \both{rf}{gain-bag} points
 (mean single-tree accuracy \both{treeacc}{rf}\% against \both{treeacc}{bag}\%), because each split
 sees only \res{rf-m} of the 22 MFCCs, but they agree less often: the average pairwise agreement of
 their test predictions is \both{agree}{rf}, against \both{agree}{bag} for bagging. Less correlated
-errors cancel in the vote, so the ensemble gains more than its members lose, as the handout
-predicts.
+errors cancel in the vote, so the ensemble gains more than its members lose.
 
 \paragraph{Hierarchy (Part 4).}
 The hierarchy is \both{hier}{loss} points below the flat tree (\both{hier}{test}\% against
@@ -183,8 +182,9 @@ The hierarchy is \both{hier}{loss} points below the flat tree (\both{hier}{test}
 correct routing. The router is the bottleneck. It sends \both{t3}{pb}\% of the rows to the wrong
 family, each then a certain species error, and its accuracy (\both{t3}{router}\%) is
 \both{hier}{router-loss} points below the family accuracy that the flat tree gets for free by
-mapping its predicted species: \both{hier}{deficit} test rows overall, and
-\both{hier}{large-deficit} in the two large families alone. A likely reason: each family is a
+mapping its predicted species, \both{hier}{deficit} test rows: Hylidae \both{hier}{hyli-deficit},
+Leptodactylidae \both{hier}{lept-deficit}, Dendrobatidae \both{hier}{dend-deficit} and Bufonidae
+\both{hier}{bufo-deficit}. A likely reason: each family is a
 union of species clusters (five in Hylidae, three in Leptodactylidae), which one tree must carve
 out from the coarse labels alone. Router recall is lowest on the small families (Bufonidae,
 \res{bufo-rows} test rows: \both{hier}{bufo-recall}\%), where the experts are constants and
@@ -193,10 +193,11 @@ perfect router would add \both{hier}{gap} points. On this dataset the easier sub
 mistakes, so the hierarchy does not help.
 
 \paragraph{Naive Bayes (Part 5).}
-Naive Bayes is the weakest model (\res{nb-test}\%). It treats the 22 MFCCs as independent within
-each species, but they are not: within a species the mean $|r|$ between two features is
-\res{within-min} to \res{within-max}, and over the training set \res{corr-above} of the 231 pairs
-have $|r| > 0.5$, up to \res{corr-max}. Correlated features count the same evidence several
+Naive Bayes is the weakest model in the matrix (\res{nb-test}\%). It treats the 22 MFCCs as
+independent within each species, but they are not: within a species the mean $|r|$ between two
+features is \res{within-min} to \res{within-max}. Over the whole training set \res{corr-above} of
+the 231 pairs have $|r| > 0.5$, up to \res{corr-max}, though that also reflects the differences
+between the species. Correlated features count the same evidence several
 times, so a block of related MFCCs can outvote the rest; a tree uses one feature per split and is
 not misled by redundancy. A second effect is
 specific to this data: MFCC~\res{nb-constant-feature} is constant in every training row of

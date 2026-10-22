@@ -351,8 +351,9 @@ than specialisation gains.
    - per criterion: the identity line, the 4 × 4 (Hylidae ↔ Leptodactylidae), the per-family
      table (Bufonidae 71.43%; final = router recall for the constant experts);
    - against the flat tree: bottleneck "router"; a perfect router would add 4.44 / 3.68;
-   - the per-family rows, router / flat tree: the 17-row gap sits in Hylidae and
-     Leptodactylidae.
+   - the per-family rows, router / flat tree: the 17-row gap, mostly in the two large
+     families (Gini 9 Hylidae + 9 Leptodactylidae − 1 Bufonidae; entropy 9 Leptodactylidae +
+     4 Dendrobatidae + 3 Hylidae + 1 Bufonidae).
 3. In the code: `predict` (mask write-back, object array), `fit_hierarchy` (`family == name` on
    the true labels), the two asserts in `analyse`.
 4. In `results_matrix.pdf`: the shaded rows of Table 2, Table 3 and the paragraph "Hierarchy

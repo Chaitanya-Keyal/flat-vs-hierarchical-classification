@@ -143,12 +143,10 @@ def macros(r):
             m[f"hier-{c}-{short}-final"] = pct(f["final"])
     family_rows = p4["family_rows"]  # per family and criterion: [router right, flat right]
     for c in CRITERIA:
-        router_right, flat_right = family_rows["All"][c]
-        m[f"hier-{c}-deficit"] = str(flat_right - router_right)
-        large = ("Hylidae", "Leptodactylidae")
-        m[f"hier-{c}-large-deficit"] = str(
-            sum(family_rows[f][c][1] - family_rows[f][c][0] for f in large)
-        )
+        for family, counts in family_rows.items():  # test rows the flat tree gets right more
+            router_right, flat_right = counts[c]
+            key = "deficit" if family == "All" else f"{family[:4].lower()}-deficit"
+            m[f"hier-{c}-{key}"] = str(flat_right - router_right).replace("-", r"\textminus{}")
         m[f"flat-{c}-bufo-recall"] = pct(family_rows["Bufonidae"][c][1] / int(m["bufo-rows"]))
     m["rf-m"] = str(p3["m"])
     mantissa, exponent = f"{p5['epsilon']:.2e}".split("e")
