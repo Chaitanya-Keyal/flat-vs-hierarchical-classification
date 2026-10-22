@@ -12,7 +12,7 @@ Family %: the family of each predicted species, by the training rows' species ma
 
 epsilon = 1e-9 * max_j Var_train(x_j) = 7.027e-11
 MFCC 1 is constant (1) within Ameeregatrivittata in training, so its
-variance there is epsilon; 1384 of the 1439 test rows share that value
+variance there is epsilon; 5563 of the 5756 training rows share that value
 
 Confusion matrix, test set (rows: true, columns: predicted)
                               0    1    2    3    4    5    6    7    8    9

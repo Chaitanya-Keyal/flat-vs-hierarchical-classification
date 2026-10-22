@@ -200,9 +200,9 @@ have $|r| > 0.5$, up to \res{corr-max}. Correlated features count the same evide
 times, so a block of related MFCCs can outvote the rest; a tree uses one feature per split and is
 not misled by redundancy. A second effect is
 specific to this data: MFCC~\res{nb-constant-feature} is constant in every training row of
-\res{nb-constant-species}, so its variance there is only $\varepsilon = \res{nb-eps}$. The
-\res{nb-constant-shared} test rows that share that value gain a large likelihood bonus for the
-species: naive Bayes predicts it for \res{nb-constant-predicted} test rows,
+\res{nb-constant-species}, so its variance there is only $\varepsilon = \res{nb-eps}$. Yet
+\res{nb-constant-shared} of the \res{n-train} training rows share that value and gain a large
+likelihood bonus: naive Bayes predicts the species for \res{nb-constant-predicted} test rows,
 \res{nb-constant-wrong} of them wrongly.
 
 \end{document}

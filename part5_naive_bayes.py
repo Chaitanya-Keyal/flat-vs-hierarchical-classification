@@ -99,11 +99,11 @@ def main():
     shared = {}
     for k, j in constant:
         value = nb.mean_[k, j]
-        shared[str(nb.classes_[k])] = int(np.sum(data.X_test[:, j] == value))
+        shared[str(nb.classes_[k])] = int(np.sum(data.X_train[:, j] == value))
         print(f"MFCC {j + 1} is constant ({value:g}) within {nb.classes_[k]} in training, so its")
         print(
-            f"variance there is epsilon; {shared[str(nb.classes_[k])]} of the {len(data.X_test)} "
-            f"test rows share that value"
+            f"variance there is epsilon; {shared[str(nb.classes_[k])]} of the {len(data.X_train)} "
+            f"training rows share that value"
         )
     cm = confusion_matrix(data.y_test, nb.predict(data.X_test), nb.classes_)
     print_confusion("Confusion matrix, test set", nb.classes_, cm)
@@ -119,7 +119,7 @@ def main():
         "rows": rows,
         "epsilon": nb.epsilon_,
         "constant": [(str(nb.classes_[k]), int(j) + 1) for k, j in constant],
-        "shared": shared,  # test rows with the constant value, per such species
+        "shared": shared,  # training rows with the constant value, per such species
         "predicted": predicted,  # per species: (test rows predicted as it, of which right)
         "correlation": correlation,
         "within": within,

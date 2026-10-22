@@ -188,8 +188,9 @@ result is printed. X = [[0], [2], [10], [12]], y = [0, 0, 1, 1]:
    map); `print_rows` prints the matrix row.
 3. Prints ε, then the constant-feature report: `np.nonzero(nb.var_ == nb.epsilon_)` finds the
    (class, feature) pairs whose smoothed variance is exactly ε, i.e. whose raw variance was 0.
-   There is one, (2, 0): Ameeregatrivittata, MFCC 1. It counts the test rows with exactly that
-   value (`nb.mean_[k, j]`, the constant): 1384 of 1439.
+   There is one, (2, 0): Ameeregatrivittata, MFCC 1. It counts the training rows with exactly
+   that value (`nb.mean_[k, j]`, the constant): 5563 of 5756. Training rows, not test rows: the
+   handout computes no statistics from the test set, and the training rows make the same point.
 4. The 10 × 10 test confusion matrix (`common.confusion_matrix`: rows true, columns predicted, in
    `classes_` order). `predicted` stores, per species, (column sum, diagonal) = (test rows
    predicted as it, of which right).
@@ -257,7 +258,7 @@ giving finite scores.
 - NB turns that into strong evidence. For Ameeregatrivittata the variance is ε, so at x = 1.0
   the MFCC 1 term is −½ log(2πε) = +10.77 nats. The other species have ordinary variances
   (4.67 × 10⁻⁵ to 2.37 × 10⁻²) and get +0.93 (Rhinellagranulosa) to +4.06 (HylaMinuta). So
-  every row with MFCC 1 = 1.0 (1384 of the 1439 test rows) gets 6.7 to 9.8 nats towards
+  every row with MFCC 1 = 1.0 (5563 of the 5756 training rows) gets 6.7 to 9.8 nats towards
   Ameeregatrivittata from this one feature, a likelihood ratio of about 800 to 19 000. A row with
   any other value pays at least 1.75 × 10⁶ nats and is never predicted Ameeregatrivittata.
 - The root cause is the Gaussian shape: MFCC 1 is a point mass at 1.0 plus a tail below it. As a
@@ -297,7 +298,7 @@ and joint log-likelihoods equal to within 2 × 10⁻⁶.
 1. From the repo root, `uv run python part5_naive_bayes.py` (the grader runs plain
    `python part5_naive_bayes.py`); about 0.4 s. It prints exactly `results/part5.txt`.
 2. Point at, in order: "Sanity check ... Passed."; the row 91.47 / 90.34 / 91.94; ε = 7.027e-11;
-   the MFCC 1 line (constant within Ameeregatrivittata, 1384 of 1439 test rows share 1.0);
+   the MFCC 1 line (constant within Ameeregatrivittata, 5563 of 5756 training rows share 1.0);
    column 2 of the confusion matrix (44, 29, 4 and 2 around the 108); the correlation summary
    (mean 0.30, max 0.91, 43 pairs); the within-species list (0.23 to 0.50).
 3. Show `fit` (one line per formula of the handout) and the three lines of `log_posterior` (the
