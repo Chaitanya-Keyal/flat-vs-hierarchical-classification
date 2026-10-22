@@ -5,11 +5,12 @@
     uv run python -m tools.package --python "CMD"   run the scripts with another interpreter, e.g.
         "uv run --no-project --python 3.9 --with numpy==1.26.4 --with pandas==2.2.3 python"
 
-Each zip holds exactly the eight files the handout names, flat at its root. It is then checked:
-the scripts import only numpy, pandas, the standard library and each other; no prohibited
-library is named anywhere and no path is absolute; and, unzipped into an empty folder next to a
-copy of Frogs_MFCCs.csv, every script runs with one plain command and prints exactly what
-results/partN.txt recorded.
+Each zip holds exactly the eight files the handout names, flat at its root, dated by the last
+commit that changed one of them. It is then checked: results_matrix.pdf is what report/ builds
+from results/numbers.tex now; the scripts import only numpy, pandas, the standard library and
+each other; no prohibited library is named anywhere and no path is absolute; and, unzipped into
+an empty folder next to a copy of Frogs_MFCCs.csv, every script runs with one plain command and
+prints exactly what results/partN.txt recorded.
 """
 
 import argparse
@@ -23,6 +24,7 @@ import zipfile
 from pathlib import Path
 
 from common import DATA_FILE
+from tools import build_pdf
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = [
@@ -37,15 +39,25 @@ OWN = {Path(f).stem for f in FILES if f.endswith(".py")}
 ALLOWED = {"numpy", "pandas"} | set(sys.stdlib_module_names) | OWN
 FORBIDDEN = ("sklearn", "scikit", "scipy", "statsmodels", "torch", "tensorflow", "keras",
              "xgboost", "lightgbm", "matplotlib")  # fmt: skip
-STAMP = (2026, 10, 26, 0, 0, 0)  # fixed, so that the zip is byte for byte reproducible
+
+
+def stamp():
+    """The date of the last commit that changed one of the files, in the committer's time zone,
+    so that the same commit always gives the same zip, byte for byte."""
+    command = ["git", "log", "-1", "--format=%cd", "--date=format:%Y %m %d %H %M %S", "--", *FILES]
+    run = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+    if run.returncode != 0 or not run.stdout.strip():
+        return (1980, 1, 1, 0, 0, 0)  # no git: the earliest date a zip can hold
+    return tuple(int(v) for v in run.stdout.split())
 
 
 def build(student_id):
     path = ROOT / "dist" / f"{student_id}_A1.zip"
     path.parent.mkdir(exist_ok=True)
+    date = stamp()
     with zipfile.ZipFile(path, "w") as zf:
         for name in FILES:
-            info = zipfile.ZipInfo(name, date_time=STAMP)
+            info = zipfile.ZipInfo(name, date_time=date)
             info.compress_type, info.external_attr = zipfile.ZIP_DEFLATED, 0o644 << 16
             zf.writestr(info, (ROOT / name).read_bytes())
     return path
@@ -81,6 +93,22 @@ def check_contents(folder):
     return problems
 
 
+def check_pdf():
+    """Rebuild the PDF from report/ and results/ in an empty folder and compare it, byte for
+    byte, with the one that ships (the build has no date or random ID in it)."""
+    if shutil.which("latexmk") is None:
+        print("  results_matrix.pdf: NOT CHECKED, latexmk is not installed")
+        return []
+    with tempfile.TemporaryDirectory() as tmp:
+        for name in ("report/results_matrix.tex", "results/numbers.tex"):
+            (Path(tmp) / name).parent.mkdir(exist_ok=True)
+            shutil.copyfile(ROOT / name, Path(tmp) / name)
+        fresh = build_pdf.build(Path(tmp) / "report").read_bytes()
+    same = fresh == (ROOT / "results_matrix.pdf").read_bytes()
+    print(f"  results_matrix.pdf: {'ok' if same else 'FAILED'}")
+    return [] if same else ["results_matrix.pdf is out of date: run python -m tools.build_pdf"]
+
+
 def check_runs(folder, python):
     """Run every script the way a grader would and compare with the recorded output."""
     shutil.copyfile(ROOT / DATA_FILE, folder / DATA_FILE)
@@ -102,11 +130,14 @@ def check_runs(folder, python):
 def main():
     parser = argparse.ArgumentParser(description="Build and check the submission zip.")
     parser.add_argument("ids", nargs="*", default=["2023B4A70727H"], help="student IDs")
-    parser.add_argument("--python", default=sys.executable, help="interpreter command")
+    parser.add_argument("--python", help="interpreter command (default: this Python)")
     args = parser.parse_args()
-    python = shlex.split(args.python)
+    python = shlex.split(args.python) if args.python else [sys.executable]
 
-    failed = False
+    problems = check_pdf()
+    for problem in problems:
+        print(f"  PROBLEM: {problem}")
+    failed = bool(problems)
     for student_id in args.ids:
         path = build(student_id)
         print(f"{path.relative_to(ROOT)}")

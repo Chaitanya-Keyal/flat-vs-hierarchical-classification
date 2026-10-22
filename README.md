@@ -116,8 +116,11 @@ uv run python -m tools.package                  # dist/2023B4A70727H_A1.zip
 uv run python -m tools.package ID [ID ...]      # one zip per student ID
 ```
 
-Each zip holds the eight files the handout names. The script then unzips it into an empty folder,
-adds the CSV, runs every part with a plain `python partN_*.py`, and checks the output against
-`results/` byte for byte. It also checks the imports against an allow-list and that no prohibited
-library is named anywhere. `--python "CMD"` repeats the run under another interpreter, e.g.
+Each zip holds the eight files the handout names, dated by the last commit that changed one of
+them, so the same commit always gives the same bytes. The script first rebuilds the PDF in an
+empty folder and checks that it matches `results_matrix.pdf` byte for byte (skipped, with a
+warning, where latexmk is missing). It then unzips each zip into an empty folder, adds the CSV,
+runs every part with a plain `python partN_*.py`, and checks the output against `results/` byte
+for byte. It also checks the imports against an allow-list and that no prohibited library is
+named anywhere. `--python "CMD"` runs the scripts under another interpreter instead, e.g.
 `uv run --no-project --python 3.9 --with numpy==1.26.4 --with pandas==2.2.3 python`.
