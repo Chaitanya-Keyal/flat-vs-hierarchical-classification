@@ -49,6 +49,15 @@ def test_log_posterior_matches_a_loop():
             assert got[n, k] == pytest.approx(expected)
 
 
+def test_predict_rejects_rows_of_another_width():
+    X, y = blobs(3)
+    nb = GaussianNB().fit(X, y)
+    for bad in (X[:, :1], np.hstack([X, X]), X[0]):  # one column would broadcast silently
+        with pytest.raises(ValueError):
+            nb.predict(bad)
+    assert len(nb.predict(X[:1])) == 1
+
+
 def test_far_away_points_do_not_underflow():
     X, y = blobs(2)
     nb = GaussianNB().fit(X, y)

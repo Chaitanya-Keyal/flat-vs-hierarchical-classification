@@ -132,10 +132,17 @@ def fit(self, X, y):
 def log_posterior(self, X):
     """log pi_c - 1/2 sum_j [log(2 pi var_cj) + (x_j - mean_cj)^2 / var_cj] for every row and
     class, up to a constant: an (n, K, d) array summed over the features."""
-    diff = np.asarray(X, dtype=float)[:, None, :] - self.mean_
+    X = np.asarray(X, dtype=float)
+    if X.ndim != 2 or X.shape[1] != self.n_features_:  # one row is X[i : i + 1]
+        raise ValueError(f"X must have shape (n, {self.n_features_}), not {X.shape}")
+    diff = X[:, None, :] - self.mean_
     terms = np.log(2 * np.pi * self.var_) + diff**2 / self.var_
     return self.log_prior_ - 0.5 * terms.sum(axis=2)
 ```
+
+- The check first: an X with another number of columns than `fit` saw (`n_features_`), or a 1-D
+  row, stops with a `ValueError`. Without it, one column would broadcast against all 22 means
+  and give silently wrong scores, the same guard the trees have.
 
 - `X[:, None, :]` is (n, 1, d); `mean_` (K, d) broadcasts against it to (n, K, d), so
   `diff[i, k, j] = x_ij − μ_kj`.
@@ -200,11 +207,12 @@ result is printed. X = [[0], [2], [10], [12]], y = [0, 0, 1, 1]:
 
 ### Tests
 
-`tests/test_part5.py`, 5 tests: the handout's sanity check; the estimates against the formulas
+`tests/test_part5.py`, 6 tests: the handout's sanity check; the estimates against the formulas
 written out on random blobs (means, 1/n variances plus ε to a tolerance far below ε, so a missing
 or wrong ε fails, log priors); a feature constant within a class, whose variance must be exactly
 ε, with every score finite; the vectorised `log_posterior` against a triple loop over rows,
-classes and features; far-away points (x = 1000) giving finite scores.
+classes and features; inputs of another width rejected; far-away points (x = 1000) giving
+finite scores.
 
 ## Results and what they mean
 
@@ -304,7 +312,7 @@ and joint log-likelihoods equal to within 2 × 10⁻⁶.
    (mean 0.30, max 0.91, 43 pairs); the within-species list (0.23 to 0.50).
 3. Show `fit` (one line per formula of the handout) and the three lines of `log_posterior` (the
    (n, K, d) broadcast).
-4. `uv run pytest tests/test_part5.py`: 5 passed, under a second.
+4. `uv run pytest tests/test_part5.py`: 6 passed, under a second.
 
 Live checks, in `uv run python` from the repo root:
 

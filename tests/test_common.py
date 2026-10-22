@@ -32,17 +32,27 @@ def test_species_map_comes_from_training_rows():
     assert np.array_equal(data.families(data.y_test), data.f_test)
 
 
-class AlwaysHylaMinuta:
+class Always:
+    """A model that predicts one species for every row."""
+
+    def __init__(self, species):
+        self.species = species
+
     def predict(self, X):
-        return np.full(len(X), "HylaMinuta")
+        return np.full(len(X), self.species)
 
 
 def test_scores_derive_the_family_from_the_predicted_species():
     data = Data()
-    train, test, family = data.scores(AlwaysHylaMinuta())
-    assert train == np.mean(data.y_train == "HylaMinuta")
+    # HylaMinuta is 62 of the 433 Hylidae test rows: the family score must count the whole family
+    _, test, family = data.scores(Always("HylaMinuta"))
     assert test == np.mean(data.y_test == "HylaMinuta")
-    assert family == np.mean(data.f_test == "Hylidae")  # HylaMinuta's family
+    assert family == np.mean(data.f_test == "Hylidae")
+    # Ameeregatrivittata is 434 of 5756 training rows but 108 of 1439 test rows, so a train / test
+    # mix-up shows (HylaMinuta has the same share in both)
+    train, test, family = data.scores(Always("Ameeregatrivittata"))
+    assert train == np.mean(data.y_train == "Ameeregatrivittata") != test
+    assert test == family == np.mean(data.y_test == "Ameeregatrivittata")
 
 
 def test_points_subtract_the_printed_values():

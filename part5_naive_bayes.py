@@ -20,6 +20,7 @@ class GaussianNB:
 
     def fit(self, X, y):
         X = np.asarray(X, dtype=float)
+        self.n_features_ = X.shape[1]
         self.classes_, codes = np.unique(y, return_inverse=True)
         self.epsilon_ = self.var_smoothing * X.var(axis=0).max()
         groups = [X[codes == k] for k in range(len(self.classes_))]
@@ -31,7 +32,10 @@ class GaussianNB:
     def log_posterior(self, X):
         """log pi_c - 1/2 sum_j [log(2 pi var_cj) + (x_j - mean_cj)^2 / var_cj] for every row and
         class, up to a constant: an (n, K, d) array summed over the features."""
-        diff = np.asarray(X, dtype=float)[:, None, :] - self.mean_
+        X = np.asarray(X, dtype=float)
+        if X.ndim != 2 or X.shape[1] != self.n_features_:  # one row is X[i : i + 1]
+            raise ValueError(f"X must have shape (n, {self.n_features_}), not {X.shape}")
+        diff = X[:, None, :] - self.mean_
         terms = np.log(2 * np.pi * self.var_) + diff**2 / self.var_
         return self.log_prior_ - 0.5 * terms.sum(axis=2)
 

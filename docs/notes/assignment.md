@@ -116,7 +116,7 @@ tree is 25 of the 1439 rows, 1.737 points.
 
 ## How we know the numbers are right
 
-- **233 tests** (`uv run pytest`):
+- **234 tests** (`uv run pytest`):
   - the handout's sanity checks;
   - a slow brute-force split search that must pick the same feature, threshold and gain as the
     vectorised one on 40 random problems full of ties, each with both criteria, and a slow whole
