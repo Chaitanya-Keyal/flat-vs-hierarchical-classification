@@ -135,8 +135,6 @@ tree is 25 of the 1439 rows, 1.737 points.
 - **Mutation checks**, run outside the repo: the code was broken on purpose in 14 ways the
   handout warns about (binary AdaBoost's stopping rule, one feature subset per tree, experts on
   the predicted family, no ε, ...), and the tests fail on every one.
-- **An independent prototype**, written separately from the handout alone and thrown away, gave
-  the same numbers in every cell of the matrix.
 - **A scikit-learn cross-check**, run outside the repo and never part of the submission:
   - naive Bayes and the confusion matrices are identical;
   - AdaBoost has the same weighted error and alpha in every round and the same test accuracy;
