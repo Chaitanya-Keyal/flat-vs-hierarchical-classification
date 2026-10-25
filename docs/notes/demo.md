@@ -30,9 +30,10 @@ everyone should have read every part's notes.
 - **2:00-6:00: Part 1.** Run the script: the sanity checks, the two rows, the depth
   sweep. In the code, `_best_split`: one sort per node, cumulative class weights, every cut at
   once, midpoints, the tie rule. The depth plot in the notebook.
-- **6:00-9:00: Part 2.** Start `part2_bagging_boosting.py`; while it runs, walk through
-  `Bagging.fit`, then `AdaBoostSAMME.fit` line by line against the handout's six steps. The
-  round-by-round plot: the error climbing towards 0.9, stumps falling behind.
+- **6:00-9:00: Part 2.** Start `part2_bagging_boosting.py`; it first prints the handout's K = 2
+  check. While it runs, walk through `Bagging.fit`, then `AdaBoostSAMME.fit` line by line
+  against the handout's six steps. The round-by-round plot: the error climbing towards 0.9,
+  stumps falling behind.
 - **9:00-11:00: Part 3.** Start `part3_random_forest.py`; while it runs: `RandomForest` is
   `Bagging` with `new_tree` overridden, and the draw happens in `DecisionTree._best_split`. Then
   its two rows and the agreement table, and the agreement plot: weaker, less alike trees make a
@@ -42,9 +43,9 @@ everyone should have read every part's notes.
   family and calls each expert once. The router is the bottleneck. Its 17-row deficit against
   the flat tree is mostly in the two large families: Gini 9 Hylidae and 9 Leptodactylidae (one
   row back on Bufonidae), entropy 3 and 9, plus 4 in Dendrobatidae and 1 in Bufonidae.
-- **14:00-16:00: Part 5.** Run the script: the sanity check, the row, the
-  correlation matrix. The Ameeregatrivittata column of the confusion matrix, and why its MFCC 1
-  variance is epsilon.
+- **14:00-16:00: Part 5.** Run the script: the sanity check, the row, the comparison with
+  the single tree, the correlation matrix. The Ameeregatrivittata column of the confusion
+  matrix, and why its MFCC 1 variance is epsilon.
 - **16:00-20:00: questions.** Questions and live changes.
 
 ## Live changes to have ready

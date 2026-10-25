@@ -1,6 +1,10 @@
 Part 2: bagging and AdaBoost (SAMME) on flat trees (predict Species)
 Data: train 5756 / test 1439 rows, 22 MFCC features, 10 species in 4 families
 
+Check: with K = 2, SAMME is binary AdaBoost with alpha doubled
+  AdenomeraHylaedactylus against HypsiboasCordobae, 3679 training rows, 10 stumps:
+  every alpha is twice binary AdaBoost's, and the predictions agree on every row. Passed.
+
 Results matrix rows
 Method                          Criterion   Train %   Test %  Family %
 2a. Bagging                     Gini          99.97    96.66     97.50

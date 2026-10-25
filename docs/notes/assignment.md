@@ -80,6 +80,7 @@ Table 3 under "Failure analysis". `results/partN.txt` is that output, verbatim.
 | P1.3 accuracy against max_depth | `main` | "Accuracy against max_depth" |
 | P2 bagging, T=25 | `part2_bagging_boosting.py`, `Bagging` | rows "2a. Bagging" |
 | P2 AdaBoost SAMME, T=50, depth 3 | `AdaBoostSAMME` | rows "2b. AdaBoost" |
+| P2 check: K = 2 is binary AdaBoost with α doubled | `binary_check` | "Check: with K = 2 ..." |
 | P2.2 against the single tree | `main` | "Test % against the single tree" |
 | P2.3 stumps against depth 3 | `main` | "Decision stumps" |
 | P3 random forest, m=4 per split | `part3_random_forest.py`, `RandomForest` | rows "3. Random Forest" |
@@ -89,6 +90,7 @@ Table 3 under "Failure analysis". `results/partN.txt` is that output, verbatim.
 | P4 accuracies, oracle, p_A, p_B, matrices, per family, identity | `analyse`, `details` | the per-criterion blocks |
 | P4 against the flat tree | `main` | "Against the flat tree of Part 1" |
 | P5 `GaussianNB(var_smoothing=1e-9)` and its check | `part5_naive_bayes.py` | "Sanity check", row "5. ..." |
+| P5.2 compare with the tree-based models | `main` | "Test % against the single tree" |
 | P5.2 correlation matrix of the training features | `print_correlations` | "Correlation matrix ..." |
 | README.txt | `README.txt` | |
 | results_matrix.pdf | `report/results_matrix.tex`, built by `tools/build_pdf.py` | |
@@ -116,13 +118,14 @@ tree is 25 of the 1439 rows, 1.737 points.
 
 ## How we know the numbers are right
 
-- **234 tests** (`uv run pytest`):
+- **235 tests** (`uv run pytest`):
   - the handout's sanity checks;
   - a slow brute-force split search that must pick the same feature, threshold and gain as the
     vectorised one on 40 random problems full of ties, each with both criteria, and a slow whole
     tree compared node by node;
   - the same tree whatever the scale of the weights, and integer weights equal to duplicated rows;
-  - SAMME with two classes against classic AdaBoost, and with four classes its 1 − 1/K limit,
+  - SAMME with two classes against classic AdaBoost (Part 2 also prints this check), and with
+    four classes its 1 − 1/K limit,
     its exact α and the clipped ε of a perfect learner;
   - the forest's single random stream, replayed tree by tree, and its draws per split;
   - the routing order, one call per expert, experts on their true family, the oracle and the

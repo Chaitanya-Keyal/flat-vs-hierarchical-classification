@@ -14,15 +14,17 @@ How to run
 
     python part1_decision_tree.py      about 5 s   Single Decision Tree rows; sanity checks
                                                    (a)-(d); accuracy against max_depth
-    python part2_bagging_boosting.py   about 45 s  Bagging and AdaBoost rows; against the
-                                                   single tree; AdaBoost rounds; stumps
+    python part2_bagging_boosting.py   about 45 s  K = 2 check; Bagging and AdaBoost rows;
+                                                   against the single tree; AdaBoost rounds;
+                                                   stumps
     python part3_random_forest.py      about 35 s  Random Forest rows; against the single tree
                                                    and bagging; agreement between the trees
     python part4_hierarchical.py       about 2 s   Hierarchical rows and Table 3; confusion
                                                    matrices; per-family accuracy; against the
                                                    flat tree
-    python part5_naive_bayes.py        about 1 s   Gaussian Naive Bayes row; sanity check;
-                                                   correlation matrix of the training features
+    python part5_naive_bayes.py        about 2 s   Gaussian Naive Bayes row; sanity check;
+                                                   against the single tree; correlation matrix
+                                                   of the training features
 
   Each script prints its rows of results_matrix.pdf under "Results matrix rows" (Part 4 prints
   Table 3 under "Failure analysis"), in %, with two decimals, along with the other numbers its

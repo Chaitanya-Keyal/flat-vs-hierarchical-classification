@@ -3,7 +3,7 @@
 import numpy as np
 
 from part1_decision_tree import DecisionTree
-from part2_bagging_boosting import AdaBoostSAMME, Bagging
+from part2_bagging_boosting import AdaBoostSAMME, Bagging, binary_check
 from tests import blobs, nodes
 
 
@@ -63,6 +63,11 @@ def test_samme_with_two_classes_is_classic_adaboost():
     classic = classic_adaboost(X, y, 20, max_depth=1)
     Z = np.random.default_rng(4).normal(size=(500, 4)) + 0.4
     assert np.array_equal(samme.predict(Z), classic(Z))
+
+
+def test_the_printed_binary_check_passes_on_two_classes_of_three():
+    X, y = blobs(4)  # keeps the two most common of the three classes
+    binary_check(X, y, rounds=15)  # asserts inside
 
 
 def test_samme_keeps_learners_up_to_its_multi_class_limit():

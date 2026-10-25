@@ -10,6 +10,11 @@ Method                          Criterion   Train %   Test %  Family %
 5. Gaussian Naive Bayes         -             91.47    90.34     91.94
 Family %: the family of each predicted species, by the training rows' species map.
 
+Test % against the single tree of Part 1 (naive Bayes has no criterion)
+Criterion  Single tree  Naive Bayes
+Gini             94.93        90.34
+Entropy          95.41        90.34
+
 epsilon = 1e-09 * max_j Var_train(x_j) = 7.027e-11
 MFCC 1 is constant (1) within Ameeregatrivittata in training, so its
 variance there is epsilon; 5563 of the 5756 training rows share that value

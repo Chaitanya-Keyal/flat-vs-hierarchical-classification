@@ -1,14 +1,25 @@
 """Part 5: Gaussian naive Bayes, flat (predicts Species). Not a tree, so it has no criterion.
 
-Also prints the correlation matrix of the 22 training features, since naive Bayes assumes
-they are independent within each class.
+Also compares its test accuracy with the single tree of Part 1, and prints the correlation
+matrix of the 22 training features, since naive Bayes assumes they are independent within
+each class.
 
     python part5_naive_bayes.py      (from the folder holding Frogs_MFCCs.csv)
 """
 
 import numpy as np
 
-from common import Data, confusion_matrix, header, print_confusion, print_rows
+from common import (
+    CRITERIA,
+    Data,
+    accuracy,
+    confusion_matrix,
+    header,
+    pct,
+    print_confusion,
+    print_rows,
+)
+from part1_decision_tree import DecisionTree
 
 
 class GaussianNB:
@@ -98,6 +109,15 @@ def main():
     rows = [("5. Gaussian Naive Bayes", "-", *data.scores(nb))]
     print_rows(rows)
     print("Family %: the family of each predicted species, by the training rows' species map.")
+
+    print("\nTest % against the single tree of Part 1 (naive Bayes has no criterion)")
+    print(f"{'Criterion':<10}{'Single tree':>12}{'Naive Bayes':>13}")
+    single = {}
+    for c in CRITERIA:
+        tree = DecisionTree(c).fit(data.X_train, data.y_train)
+        single[c] = accuracy(data.y_test, tree.predict(data.X_test))
+        print(f"{c.capitalize():<10}{pct(single[c]):>12}{pct(rows[0][3]):>13}")
+
     print(f"\nepsilon = {nb.var_smoothing:g} * max_j Var_train(x_j) = {nb.epsilon_:.3e}")
     constant = list(zip(*np.nonzero(nb.var_ == nb.epsilon_)))  # zero variance before smoothing
     shared = {}
@@ -121,6 +141,7 @@ def main():
         print(f"  {c:<24}{r:.2f}")
     return {
         "rows": rows,
+        "single_test": single,
         "epsilon": nb.epsilon_,
         "constant": [(str(nb.classes_[k]), int(j) + 1) for k, j in constant],
         "shared": shared,  # training rows with the constant value, per such species

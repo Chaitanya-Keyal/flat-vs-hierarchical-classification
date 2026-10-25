@@ -1,7 +1,8 @@
 """Part 2: bagging and multi-class AdaBoost (SAMME) on flat trees (predict Species).
 
 Both ensembles use the Part 1 tree and run with each criterion; AdaBoost with decision stumps
-is run as well, for comparison.
+is run as well, for comparison. First comes the handout's check that SAMME with two classes is
+binary AdaBoost with alpha doubled.
 
     python part2_bagging_boosting.py      (from the folder holding Frogs_MFCCs.csv)
 """
@@ -83,10 +84,43 @@ class AdaBoostSAMME:
         return self.classes_[scores.argmax(axis=1)]
 
 
+def binary_check(X, y, rounds=10):
+    """The handout's check: with K = 2, SAMME is binary AdaBoost with alpha doubled. Runs on the
+    rows of the two most common classes, against binary AdaBoost written out with labels -1/+1
+    and alpha' = 1/2 ln((1 - eps) / eps); printed, so that a failure stops the script."""
+    labels, counts = np.unique(y, return_counts=True)
+    a, b = np.sort(labels[np.argsort(-counts, kind="stable")[:2]])
+    keep = (y == a) | (y == b)
+    X, y = X[keep], y[keep]
+    s = np.where(y == b, 1, -1)
+    w = np.full(len(y), 1 / len(y))
+    alphas, score = [], np.zeros(len(y))
+    for _ in range(rounds):
+        tree = DecisionTree("gini", max_depth=1).fit(X, y, sample_weight=w)
+        h = np.where(tree.predict(X) == b, 1, -1)
+        eps = float(np.clip(w[h != s].sum(), 1e-10, 1 - 1e-10))
+        if eps >= 1 / 2:
+            break
+        alpha = 0.5 * np.log((1 - eps) / eps)
+        w = w * np.exp(-alpha * s * h)  # hits down, misses up
+        w /= w.sum()
+        alphas.append(alpha)
+        score += alpha * h
+    samme = AdaBoostSAMME(rounds, "gini", max_depth=1).fit(X, y)
+    assert len(samme.alphas_) == len(alphas) and np.allclose(samme.alphas_, 2 * np.array(alphas))
+    assert (samme.predict(X) == np.where(score > 0, b, a)).all()
+    print("\nCheck: with K = 2, SAMME is binary AdaBoost with alpha doubled")
+    print(f"  {a} against {b}, {len(y)} training rows, {len(alphas)} stumps:")
+    print(
+        "  every alpha is twice binary AdaBoost's, and the predictions agree on every row. Passed."
+    )
+
+
 def main():
     data = Data()
     header("Part 2: bagging and AdaBoost (SAMME) on flat trees (predict Species)", data)
     X, y = data.X_train, data.y_train
+    binary_check(X, y)
     single = {c: DecisionTree(c).fit(X, y) for c in CRITERIA}
     bagging = {c: Bagging(BAGGING_T, c).fit(X, y) for c in CRITERIA}
     boosting = {c: AdaBoostSAMME(BOOSTING_T, c, BOOSTING_DEPTH).fit(X, y) for c in CRITERIA}

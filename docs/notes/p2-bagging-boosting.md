@@ -254,6 +254,12 @@ the submission (some are marked as a reminder).
 
 ### `main()`
 
+- First `binary_check`, the handout's "Check: for K = 2 this is the usual AdaBoost with α
+  doubled". On the training rows of the two most common species (AdenomeraHylaedactylus and
+  HypsiboasCordobae, 3679 rows) it runs 10 rounds of stumps twice: binary AdaBoost written out
+  (labels −1 / +1, α' = ½ ln((1 − ε)/ε), weights × e^(∓α')) and `AdaBoostSAMME`. It asserts that
+  every SAMME α is exactly 2α' and that both predict the same species on every row, then prints
+  "Passed."; a failure stops the script.
 - `Data()`: the handout's split. For each criterion it fits the Part 1 tree,
   `Bagging(BAGGING_T, c)`, `AdaBoostSAMME(BOOSTING_T, c, BOOSTING_DEPTH)` and the stumps,
   `AdaBoostSAMME(BOOSTING_T, c, max_depth=1)`, with the constants (25, 50, 3) at the top of the
@@ -346,14 +352,16 @@ The stumps' train accuracy is *not part of the submission*; everything else is p
 2. While it runs, walk through `Bagging.fit` (the `RandomState` at the top, the handout's
    `randint` call), then `AdaBoostSAMME.fit` line by line against the handout's six steps, then
    `tally`.
-3. In the output, point at: the four matrix rows; bagging +1.73 / +1.46 over the single tree and
+3. In the output, point at: the K = 2 check ("Passed."); the four matrix rows; bagging
+   +1.73 / +1.46 over the single tree and
    AdaBoost +0.41 / −1.25; the rounds table (50 of 50 kept, ε rising but below 0.9); stumps
    83.32 / 84.16 with 8 / 9 of 10 species.
 4. In `notebooks/demo.ipynb`, the Part 2 plot: the test accuracy of the vote after each round,
    and each round's ε against the 0.9 line, depth 3 against stumps. Its "Try it" cell,
    `AdaBoostSAMME(20, "gini", max_depth=5)`, prints 20 rounds and 97.08% test.
-5. `uv run pytest tests/test_part2.py`: 8 tests in under a second (the handout's bootstraps,
-   identical refits, the majority vote, K = 2 is classic AdaBoost, K = 4 keeps all 30 rounds with
+5. `uv run pytest tests/test_part2.py`: 9 tests in under a second (the handout's bootstraps,
+   identical refits, the majority vote, K = 2 is classic AdaBoost, the printed K = 2 check passes,
+   K = 4 keeps all 30 rounds with
    errors above ½ and the exact α, a perfect learner's ε clipped to 10⁻¹⁰, the first ε is the
    plain error rate, the stop on XOR).
 6. Live checks in `uv run python`, from the repo root:

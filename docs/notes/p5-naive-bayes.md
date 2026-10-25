@@ -193,16 +193,20 @@ result is printed. X = [[0], [2], [10], [12]], y = [0, 0, 1, 1]:
 2. Fits on the training rows. `data.scores(nb)` (`common.py`) gives train accuracy, test accuracy
    and the derived family accuracy (each predicted species mapped to its family by the training
    map); `print_rows` prints the matrix row.
-3. Prints ε, then the constant-feature report: `np.nonzero(nb.var_ == nb.epsilon_)` finds the
+3. Compares with the tree-based models, as Task 2 asks: it fits Part 1's unconstrained tree with
+   each criterion and prints its test accuracy beside naive Bayes's (94.93 / 95.41 against 90.34).
+   The ensembles are compared on page 2 of `results_matrix.pdf`; refitting them here would add a
+   minute.
+4. Prints ε, then the constant-feature report: `np.nonzero(nb.var_ == nb.epsilon_)` finds the
    (class, feature) pairs whose smoothed variance is exactly ε, i.e. whose raw variance was 0.
    There is one, (2, 0): Ameeregatrivittata, MFCC 1. It counts the training rows with exactly
    that value (`nb.mean_[k, j]`, the constant): 5563 of 5756. Training rows, not test rows: the
    handout computes no statistics from the test set, and the training rows make the same point.
-4. The 10 × 10 test confusion matrix (`common.confusion_matrix`: rows true, columns predicted, in
+5. The 10 × 10 test confusion matrix (`common.confusion_matrix`: rows true, columns predicted, in
    `classes_` order). `predicted` stores, per species, (column sum, diagonal) = (test rows
    predicted as it, of which right).
-5. The correlation matrix and the within-species means.
-6. Returns a dict, which `tools/run_all.py` saves in `results/results.json` and turns into
+6. The correlation matrix and the within-species means.
+7. Returns a dict, which `tools/run_all.py` saves in `results/results.json` and turns into
    `results/numbers.tex`, the source of the report's numbers (79 = 187 − 108 comes from there).
 
 ### Tests
@@ -306,8 +310,10 @@ and joint log-likelihoods equal to within 2 × 10⁻⁶.
 ## Demo
 
 1. From the repo root, `uv run python part5_naive_bayes.py` (the grader runs plain
-   `python part5_naive_bayes.py`); about 0.4 s. It prints exactly `results/part5.txt`.
-2. Point at, in order: "Sanity check ... Passed."; the row 91.47 / 90.34 / 91.94; ε = 7.027e-11;
+   `python part5_naive_bayes.py`); about 1.5 s, most of it the two comparison trees. It prints
+   exactly `results/part5.txt`.
+2. Point at, in order: "Sanity check ... Passed."; the row 91.47 / 90.34 / 91.94; the comparison
+   with the single tree (94.93 / 95.41); ε = 7.027e-11;
    the MFCC 1 line (constant within Ameeregatrivittata, 5563 of 5756 training rows share 1.0);
    column 2 of the confusion matrix (44, 29, 4 and 2 around the 108); the correlation summary
    (mean 0.30, max 0.91, 43 pairs); the within-species list (0.23 to 0.50).
