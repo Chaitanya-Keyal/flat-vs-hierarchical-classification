@@ -5,7 +5,7 @@
 Twenty minutes for three people. Spend about two minutes on the setup and the rules, two to
 three minutes per part, and leave the rest for questions and live changes. Run the scripts
 themselves, since they print exactly what the matrix says. Use the notebook for the plots and
-the "Try it" cells, and keep `results_matrix.pdf` open beside them. Parts 2 and 3 take about 45
+the experiments, and keep `results_matrix.pdf` open beside them. Parts 2 and 3 take about 45
 and 35 seconds, so start them first and talk while they run. Anyone may be asked anything, so
 everyone should have read every part's notes.
 
@@ -63,10 +63,10 @@ Each one is a small edit or a notebook cell. The part notes give the code and wh
   - out-of-bag accuracy for bagging;
   - another T or another depth.
 - **Part 3:**
-  - m = 1 or 22 (the notebook's "Try it");
+  - m = 1 or 22 (in the notebook);
   - one feature subset per tree instead of per split, to show why the handout calls it wrong.
 - **Part 4:**
-  - a weaker router (the notebook's "Try it");
+  - a weaker router (in the notebook);
   - experts trained on the predicted family. Nothing changes here, because the router is 100%
     right on the training rows; explain why.
   - the forest as the router.

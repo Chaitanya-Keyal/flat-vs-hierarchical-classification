@@ -357,7 +357,7 @@ The stumps' train accuracy is *not part of the submission*; everything else is p
    AdaBoost +0.41 / −1.25; the rounds table (50 of 50 kept, ε rising but below 0.9); stumps
    83.32 / 84.16 with 8 / 9 of 10 species.
 4. In `notebooks/demo.ipynb`, the Part 2 plot: the test accuracy of the vote after each round,
-   and each round's ε against the 0.9 line, depth 3 against stumps. Its "Try it" cell,
+   and each round's ε against the 0.9 line, depth 3 against stumps. The cell after it,
    `AdaBoostSAMME(20, "gini", max_depth=5)`, prints 20 rounds and 97.08% test.
 5. `uv run pytest tests/test_part2.py`: 9 tests in under a second (the handout's bootstraps,
    identical refits, the majority vote, K = 2 is classic AdaBoost, the printed K = 2 check passes,
@@ -500,7 +500,7 @@ len(np.unique(rows)) / len(y)  # 0.617: the first bootstrap's distinct rows
 - **Another T or max_depth.** Change `BAGGING_T`, `BOOSTING_T` or `BOOSTING_DEPTH` at the top
   of `part2_bagging_boosting.py`: `main` builds the models and prints its labels from them (the
   stumps keep `max_depth=1`). Do not run `tools/run_all.py` after a demo change: it rewrites
-  `results/`. The notebook's "Try it" cell is the quickest route.
+  `results/`. The notebook's AdaBoost experiment cell is the quickest route.
   - A deeper weak learner needs fewer rounds: depth 5 with T = 20 gives 97.08% (Gini).
   - Long runs of depth-3 trees push some weights below rounding error: from round 85
     (entropy) or 111 (Gini) the largest weight is 10¹⁸ to 10²¹ times the smallest. At a cut

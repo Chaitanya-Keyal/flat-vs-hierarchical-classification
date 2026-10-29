@@ -87,7 +87,7 @@ The handout's rule, which the code implements term for term:
   about 5 × 10⁻³²⁴, so a log below about −745 becomes exactly 0. If that happens for every class,
   argmax of ten zeros returns class 0 whatever the data. In log space the product is a sum, and
   −2.8 × 10⁹ (the most negative score on our test set) is an ordinary number.
-- In fact, on this data the direct product would have worked for the test set. MFCC
+- On this data the direct product would have worked for the test set. MFCC
   variances are small (~10⁻³), so densities are often above 1, and every test row's best class
   has a log score of at least −129.55. Under 0.6% of the 14 390 (row, class) products underflow
   (the Ameeregatrivittata column for the 55 test rows with MFCC 1 ≠ 1.0, and 24 HylaMinuta

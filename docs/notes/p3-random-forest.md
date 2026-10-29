@@ -348,7 +348,7 @@ Not graded; from `results/part3.txt`:
    (part3).
 4. Tests: `uv run pytest tests/test_part3.py tests/test_part1.py -q`.
 5. The notebook's Part 3 section (`notebooks/demo.ipynb`) shows the rows and a plot of agreement
-   and mean tree accuracy, bagging against forest. Its "Try it" cell fits m = 1, 4 and 22 with
+   and mean tree accuracy, bagging against forest. The cell after it fits m = 1, 4 and 22 with
    T = 25, not 50 (Gini), and prints m = 1: 97.08%, agreement 0.847, mean tree 89.55%; m = 4:
    97.85%, 0.899, 93.00% (the first 25 trees of the matrix forest); m = 22: 96.53%, 0.923,
    93.54%.
